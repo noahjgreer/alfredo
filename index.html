@@ -6,7 +6,7 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
     <link type="text/css" rel="stylesheet" href="/assets/style.css">
-    <title>Alfredo - Dashboard</title>
+    <title>Alfredo - Login</title>
     <!-- Icons and Stuff -->
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicons/favicon-32x32.png">
@@ -22,7 +22,7 @@
     <meta name="msapplication-config" content="/assets/icons/favicons/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
 </head>
-<body>
+<body id="login">
     <div class="special-heading">
         <img src="/assets/icons/favicons/android-chrome-512x512.png" alt="Alfredo Logo" class="icon">
         <h1>Alfredo</h1>
@@ -34,9 +34,11 @@
     <div id="login">
         <div id="pin" class="input">
             <img class="icon" src="/assets/icons/lock.svg" alt="">
-            <input type="number" name="pin" id="input" placeholder="Insert PIN" inputmode="numeric">
-            <img class="icon" src="/assets/icons/arrowright.svg" alt="">
+            <input type="text" name="user" id="input" placeholder="Insert Username" inputmode="text">
+            <!-- <img class="icon" src="/assets/icons/arrowright.svg" alt=""> -->
         </div>
+        <a href="/tasks.html" class="attention-button">Login</a>
+        <!-- <a href="/" class="route">Sign Up</a> -->
     </div>
 </body>
 

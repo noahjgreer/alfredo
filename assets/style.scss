@@ -1,11 +1,19 @@
 // Declarations
 $font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-$paragraph-font-size: 1rem;
+$paragraph-font-size: 1.1rem;
+$text-field-font-size: 1rem;
 $rounded-radius: 100rem;
 $slightly-rounded-radius: 0.75rem;
+$attention-button-radius: 0.85rem;
 $medium-div-margin-block: 2rem;
+$hyperlink-margin-block: 0.75rem;
+$attention-button-padding: 1rem 0px;
 $text-field-icon-color: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) brightness(96%) contrast(84%);
 $text-field-color: #EEEEEF;
+$unselected-icon-color: invert(71%) sepia(0%) saturate(2028%) hue-rotate(183deg) brightness(85%) contrast(92%);;
+$unselected-color: #999999;
+$hyperlink-color: #3478F6;
+$backdrop-blur: blur(10px);
 
 @mixin font-padding {
     margin: 0.25rem 5%;
@@ -26,20 +34,35 @@ html {
     min-height: 100%;
     height: 100%;
     overflow-x: hidden;
+    display: flex;
+    align-items: stretch;
 }
 
 body {
-    margin: 0px 5%;
+    margin: 2.5rem 5%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100%;
-    height: 100%;
-    justify-content: space-between;
+    // min-height: 100%;
+    // height: 100%;
+    flex: 1;
 }
 
-h1, h2, p {
-    @include font-padding();
+body#login {
+    margin: 0px 5% 2rem;
+    justify-content: space-between;
+    h1, h2, p, a {
+        @include font-padding();
+    }
+}
+
+h1 {
+    font-size: 2.1rem;
+}
+
+h1, h2, p, a {
+    // @include font-padding();
+    margin-block: 0.25rem;
     font-family: $font;
     user-select: none;
 }
@@ -49,20 +72,90 @@ img {
     pointer-events: none;
 }
 
-p {
+p, a {
     font-size: $paragraph-font-size;
+    text-decoration: none;
+    color: inherit;
 }
 
-div {
+a {
+    color: $hyperlink-color;
+    text-align: center;
+    margin-block: $hyperlink-margin-block;
+}
+
+div, header {
     display: flex;
     flex-direction: column;
     max-width: 100%;
     width: 100%;
 }
 
+#hd1 {
+    background-color: #ffffffee;
+    backdrop-filter: $backdrop-blur;
+    justify-content: space-between;
+    height: 2.75rem;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    top: 0;
+    left: 0;
+    p {
+        text-align: center;
+        font-weight: 650;
+        font-size: 1rem;
+        margin-block: 0.5rem;
+    }
+}
+
+footer {
+    display: flex;
+    width: 100% - 10%;
+    position: fixed;
+    bottom: 0;
+    border-top: 0.5px solid $unselected-color;
+    padding: 0.1rem 5%;
+    justify-content: space-around;
+    background-color: #ffffffee;
+    backdrop-filter: $backdrop-blur;
+    .footer-icon {
+        width: 1.5rem;
+        padding-block: 0.275rem;
+    }
+    a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.65rem;
+        font-weight: 500;
+        margin: 0px;
+        flex: 1;
+        img {
+            filter: $unselected-icon-color;
+        }
+        color: $unselected-color;
+    }
+}
+
+.img-reference {
+    z-index: 99;
+    position: fixed;
+    width: 100%;
+    opacity: 100%;
+    bottom: 0px;
+    left: 0px;
+}
+
 #head-elements {
     margin-block: 1rem;
     display: flex;
+}
+
+div.line {
+    padding-block: 0.125rem;
+    border-bottom: $unselected-color solid 0.5px;
 }
 
 .special-heading {
@@ -80,21 +173,32 @@ div {
     }
 }
 
+.attention-button {
+    width: 100%;
+    background-color: $hyperlink-color;
+    color: white;
+    font-weight: 600;
+    padding: $attention-button-padding;
+    border-radius: $attention-button-radius;
+}
+
 #login {
     margin-inline: 5%;
     // margin-block: 0rem;
     margin-block: $medium-div-margin-block;
     width: 100%;
+    align-items: center;
     #pin {
         flex-direction: row;
         background-color: $text-field-color;
         display: flex;
         border-radius: $slightly-rounded-radius;
+        margin-block: $medium-div-margin-block;
         #input {
             background-color: transparent;
             border: none;
-            padding: 0.35rem 0rem;
-            font-size: $paragraph-font-size;
+            padding: 0.45rem 0rem;
+            font-size: $text-field-font-size;
             font-family: $font;
             width: 100%;
         }
