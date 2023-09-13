@@ -173,6 +173,14 @@ div.line {
     }
 }
 
+.checklists {
+    ul {
+        list-style-type: none;
+        padding: 0px;
+        margin: 0px;
+    }
+}
+
 .attention-button {
     width: 100%;
     background-color: $hyperlink-color;
