@@ -16,7 +16,7 @@ async function sendRequest() {
     if (fetchedIP.ip == '47.144.17.228') {
         loc = "192.168.254.64";
         if (window.location.protocol == "https:") {
-            window.location.protocol = "http:";
+            window.location = "http://" + window.location.hostname + window.location.pathname;
         }
     } else {
         loc = '47.144.17.228';
