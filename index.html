@@ -23,24 +23,33 @@
     <meta name="theme-color" content="#ffffff">
 </head>
 <body id="login">
+    <!-- <img src="/assets/images/20230920_031601000_iOS.png" class="img-reference"> -->
     <div class="special-heading">
         <img src="/assets/icons/favicons/android-chrome-512x512.png" alt="Alfredo Logo" class="icon">
         <h1>Alfredo</h1>
+        <!-- <h1>Card Details</h1> -->
         <p>Login to alfredo to access your routine and tasks.</p>
+        <!-- <p>Verify and complete your card<br> information.</p> -->
     </div>
-    <div id="text-body">
+    <!-- <div id="text-body">
         
-    </div>
-    <div id="login">
-        <div id="pin" class="input">
-            <img class="icon" src="/assets/icons/lock.svg" alt="">
-            <input type="text" name="user" id="input" placeholder="Insert Username" inputmode="text">
+    </div> -->
+    <div id="login" class="bi-input-container">
+        <div id="user" class="input">
+            <!-- <img class="icon" src="/assets/icons/lock.svg" alt=""> -->
+            <label for="user">User</label>
+            <input type="text" name="user" class="input" id="userField" placeholder="Required" inputmode="text">
             <!-- <img class="icon" src="/assets/icons/arrowright.svg" alt=""> -->
         </div>
-        <a href="/tasks.html" class="attention-button">Login</a>
+        <div id="password" class="input">
+            <label for="password">Password</label>
+            <input type="text" name="password" class="input" id="passwordField" placeholder="Required" inputmode="text">
+        </div>
         <!-- <a href="/" class="route">Sign Up</a> -->
     </div>
+    <button type="button" onclick="callLogin()" class="attention-button" id="login-button">Login</button>
 </body>
 
-<script src="/assets/basics.js"></script>
+<script src="/assets/scripts/basics.js"></script>
+<script src="/assets/scripts/login.js"></script>
 </html>

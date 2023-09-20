@@ -1,22 +1,25 @@
 // Declarations
 $font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-$paragraph-font-size: 1.1rem;
+$paragraph-font-size: 1.05rem;
 $text-field-font-size: 1rem;
 $rounded-radius: 100rem;
 $slightly-rounded-radius: 0.75rem;
 $attention-button-radius: 0.85rem;
-$medium-div-margin-block: 2rem;
+$medium-div-margin-block: 1.75rem;
+$body-standard-margin: 2.5rem 5%;
+$body-standard-margin-inline: 5%;
 $hyperlink-margin-block: 0.75rem;
 $attention-button-padding: 1rem 0px;
 $text-field-icon-color: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) brightness(96%) contrast(84%);
-$text-field-color: #EEEEEF;
+$text-field-color: #F2F2F6;
 $unselected-icon-color: invert(71%) sepia(0%) saturate(2028%) hue-rotate(183deg) brightness(85%) contrast(92%);;
 $unselected-color: #999999;
+$input-span-color: #BCBCC1;
 $hyperlink-color: #3478F6;
 $backdrop-blur: blur(10px);
 
 @mixin font-padding {
-    margin: 0.25rem 5%;
+    margin: 0.325rem 5%;
 }
 
 @mixin icon {
@@ -39,7 +42,7 @@ html {
 }
 
 body {
-    margin: 2.5rem 5%;
+    margin: $body-standard-margin;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -50,7 +53,8 @@ body {
 
 body#login {
     margin: 0px 5% 2rem;
-    justify-content: space-between;
+    // margin-top: -14.075%;
+    justify-content: start;
     h1, h2, p, a {
         @include font-padding();
     }
@@ -58,13 +62,28 @@ body#login {
 
 h1 {
     font-size: 2.1rem;
+    letter-spacing: 0.175px;
 }
 
-h1, h2, p, a {
+p {
+    line-height: 1.45rem;
+    letter-spacing: 0.0475px;
+}
+
+h1, h2, p, a, button, label {
     // @include font-padding();
     margin-block: 0.25rem;
     font-family: $font;
     user-select: none;
+}
+
+label {
+    font-size: 1.05rem;
+    letter-spacing: 0px;
+    margin: 0px;
+    align-self: center;
+    margin-inline: 5.5%;
+    font-weight: 600;
 }
 
 img {
@@ -72,7 +91,7 @@ img {
     pointer-events: none;
 }
 
-p, a {
+p, a, button {
     font-size: $paragraph-font-size;
     text-decoration: none;
     color: inherit;
@@ -143,9 +162,10 @@ footer {
     z-index: 99;
     position: fixed;
     width: 100%;
-    opacity: 100%;
+    opacity: 50%;
     bottom: 0px;
     left: 0px;
+    // mix-blend-mode: difference;
 }
 
 #head-elements {
@@ -162,7 +182,7 @@ div.line {
     display: flex;
     align-items: center;
     margin-block: $medium-div-margin-block;
-    width: 80%;
+    width: 100%;
     h1, h2, p {
         text-align: center;
     }
@@ -182,41 +202,79 @@ div.line {
 }
 
 .attention-button {
-    width: 100%;
+    width: calc(100% - ($body-standard-margin-inline * 2));
+    -webkit-tap-highlight-color:  transparentize($color: white, $amount: 0.8);
     background-color: $hyperlink-color;
     color: white;
     font-weight: 600;
+    border: none;
     padding: $attention-button-padding;
     border-radius: $attention-button-radius;
+    position: absolute;
+    bottom: 0%;
+    margin: $body-standard-margin;
 }
 
 #login {
     margin-inline: 5%;
     // margin-block: 0rem;
-    margin-block: $medium-div-margin-block;
+    // margin-block: $medium-div-margin-block;
     width: 100%;
     align-items: center;
-    #pin {
+    .input {
         flex-direction: row;
         background-color: $text-field-color;
         display: flex;
-        border-radius: $slightly-rounded-radius;
-        margin-block: $medium-div-margin-block;
-        #input {
+        label {
+            min-width: 22.5%;
+            max-width: 22.5%;
+        }
+        input.input {
             background-color: transparent;
             border: none;
-            padding: 0.45rem 0rem;
+            padding: 0.75rem 2.5%;
             font-size: $text-field-font-size;
             font-family: $font;
+            letter-spacing: 0.25px;
             width: 100%;
+            -webkit-tap-highlight-color: transparent;
         }
         #input::placeholder {
-            color: #838387;
+            color: $input-span-color;
         }
+    }
+    input:focus, input:hover, input:active
+    {
+        outline: none;
+    }
+}
+
+.bi-input-container {
+    .input {
+        margin-block: 0px;
+    }
+    .input:nth-of-type(1) {
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+    .input:nth-last-of-type(1) {
+        border-top-left-radius: 0px;
+        border-top-right-radius: 0px;
+    }
+    .input-span {
+        min-height: 0.5px;
+        max-height: 0.5px;
+        position: relative;
+        margin-bottom: -0.5px;
+        background-color: $input-span-color;
+        width: 97.25%;
+        left: 1.375%;
     }
 }
 
 .input {
+    margin-block: $medium-div-margin-block;
+    border-radius: $slightly-rounded-radius;
     .icon {
         filter: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) brightness(96%) contrast(84%);
         margin-inline: 1.25%;
@@ -227,6 +285,7 @@ div.line {
     @include icon;
 }
 
-*:focus {
+*:focus, *:hover, *:active, * {
+    -webkit-tap-highlight-color: transparent;
     outline: none;
 }

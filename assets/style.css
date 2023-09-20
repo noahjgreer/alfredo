@@ -22,22 +22,37 @@ body {
 
 body#login {
   margin: 0px 5% 2rem;
-  justify-content: space-between;
+  justify-content: start;
 }
 body#login h1, body#login h2, body#login p, body#login a {
-  margin: 0.25rem 5%;
+  margin: 0.325rem 5%;
 }
 
 h1 {
   font-size: 2.1rem;
+  letter-spacing: 0.175px;
 }
 
-h1, h2, p, a {
+p {
+  line-height: 1.45rem;
+  letter-spacing: 0.0475px;
+}
+
+h1, h2, p, a, button, label {
   margin-block: 0.25rem;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+}
+
+label {
+  font-size: 1.05rem;
+  letter-spacing: 0px;
+  margin: 0px;
+  align-self: center;
+  margin-inline: 5.5%;
+  font-weight: 600;
 }
 
 img {
@@ -47,8 +62,8 @@ img {
   pointer-events: none;
 }
 
-p, a {
-  font-size: 1.1rem;
+p, a, button {
+  font-size: 1.05rem;
   text-decoration: none;
   color: inherit;
 }
@@ -120,7 +135,7 @@ footer a img {
   z-index: 99;
   position: fixed;
   width: 100%;
-  opacity: 100%;
+  opacity: 50%;
   bottom: 0px;
   left: 0px;
 }
@@ -138,8 +153,8 @@ div.line {
 .special-heading {
   display: flex;
   align-items: center;
-  margin-block: 2rem;
-  width: 80%;
+  margin-block: 1.75rem;
+  width: 100%;
 }
 .special-heading h1, .special-heading h2, .special-heading p {
   text-align: center;
@@ -157,42 +172,78 @@ div.line {
 }
 
 .attention-button {
-  width: 100%;
+  width: 90%;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
   background-color: #3478F6;
   color: white;
   font-weight: 600;
+  border: none;
   padding: 1rem 0px;
   border-radius: 0.85rem;
+  position: absolute;
+  bottom: 0%;
+  margin: 2.5rem 5%;
 }
 
 #login {
   margin-inline: 5%;
-  margin-block: 2rem;
   width: 100%;
   align-items: center;
 }
-#login #pin {
+#login .input {
   flex-direction: row;
-  background-color: #EEEEEF;
+  background-color: #F2F2F6;
   display: flex;
-  border-radius: 0.75rem;
-  margin-block: 2rem;
 }
-#login #pin #input {
+#login .input label {
+  min-width: 22.5%;
+  max-width: 22.5%;
+}
+#login .input input.input {
   background-color: transparent;
   border: none;
-  padding: 0.45rem 0rem;
+  padding: 0.75rem 2.5%;
   font-size: 1rem;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.25px;
   width: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
-#login #pin #input::-moz-placeholder {
-  color: #838387;
+#login .input #input::-moz-placeholder {
+  color: #BCBCC1;
 }
-#login #pin #input::placeholder {
-  color: #838387;
+#login .input #input::placeholder {
+  color: #BCBCC1;
+}
+#login input:focus, #login input:hover, #login input:active {
+  outline: none;
 }
 
+.bi-input-container .input {
+  margin-block: 0px;
+}
+.bi-input-container .input:nth-of-type(1) {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+.bi-input-container .input:nth-last-of-type(1) {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+.bi-input-container .input-span {
+  min-height: 0.5px;
+  max-height: 0.5px;
+  position: relative;
+  margin-bottom: -0.5px;
+  background-color: #BCBCC1;
+  width: 97.25%;
+  left: 1.375%;
+}
+
+.input {
+  margin-block: 1.75rem;
+  border-radius: 0.75rem;
+}
 .input .icon {
   filter: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) brightness(96%) contrast(84%);
   margin-inline: 1.25%;
@@ -203,6 +254,7 @@ div.line {
   padding-inline: 0.35rem;
 }
 
-*:focus {
+*:focus, *:hover, *:active, * {
+  -webkit-tap-highlight-color: transparent;
   outline: none;
 }/*# sourceMappingURL=style.css.map */

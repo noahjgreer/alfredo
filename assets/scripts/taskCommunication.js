@@ -15,14 +15,11 @@ async function sendRequest() {
 
     if (fetchedIP.ip == '47.144.17.228') {
         loc = "192.168.254.64";
-        if (window.location.protocol == "https:") {
-            window.location = "http://" + window.location.hostname + window.location.pathname;
-        }
     } else {
         loc = '47.144.17.228';
     }
 
-    const response = await fetch(`http://${loc}:3000/`, options);
+    const response = await fetch(`https://${loc}:3000/`, options);
     const data = await response.text();
     
     console.log(data);
