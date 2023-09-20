@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nedb": "^1.8.0"
+  },
+  "name": "alfredo",
+  "version": "0.0.5",
+  "description": "alfredo packages",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "muffinmode"
+  ],
+  "author": "Noah Greer",
+  "license": "MIT"
+}
