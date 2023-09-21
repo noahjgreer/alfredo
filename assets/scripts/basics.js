@@ -26,10 +26,11 @@ infoContainer.forEach((element) => {
 //#endregion
 
 //#region Viewable Debug
+/*
 const debugConsole = document.getElementById('debug');
 
 function debugUpdate() {
-    debugConsole.innerHTML = new String(console.logs, console.errors, console.warns, console.debugs);
+    // debugConsole.innerHTML = new String(console.logs, console.errors, console.warns, console.debugs);
 }
 
 console.defaultLog = console.log.bind(console);
@@ -78,26 +79,53 @@ console.debug = function(){
     debugUpdate();
 
 }
+*/
 //#endregion
 
 //#region Alert
-var alertElement = document.createElement('div').setAttribute('id', "alert");
 
+//Simple function made to create nodes
+function createElement(nodetype, id, innertext, className) {
+    var node = document.createElement(nodetype);
+    if (id) node.setAttribute('id', id);
+    if (innertext) node.appendChild(document.createTextNode(innertext));
+    if (className) node.setAttribute('class', className);
+    return node;
+}
 
-function callAlert() {
-    alertElement.innerHTML =  `
-        <p id="alertMessage">
-            An error has occurred, please try again later.
+function callAlert(messageTitle, messageBody) {
+    var alertElement = document.createElement('div');
+    alertElement.setAttribute('id', 'alertContainer');
+    alertElement.innerHTML = `
+    <div id='alert'> 
+        <div id="alertMessage">
+        <h4 id="messageTitle">
+        ${messageTitle}
+        </h4>
+        <p id="messageBody">
+        ${messageBody}
         </p>
+        </div>
         <div id="alertOptions">
-            <button class="alertButton" id="OK">
+            <button class="alertButton" id="OK" onclick="console.log('hit')">
                 OK
             </button>
         </div>
+    </div>
+    
 `
-    document.body.innerHTML += alertElement;
+    document.body.appendChild(alertElement);    
 
     console.log(alertElement)
 }
+
 //#endregion
 
+function intervalLoop() {
+    document.querySelector('.img-reference').classList.toggle('visible');
+    console.log('interval');
+
+    setTimeout(intervalLoop, 500);
+}
+
+// intervalLoop();

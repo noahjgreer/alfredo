@@ -17,7 +17,9 @@ $unselected-color: #999999;
 $modal-text-color: #85858A;
 $input-span-color: #BCBCC1;
 $hyperlink-color: #3478F6;
+$backdrop-transparentize: transparentize($color: $text-field-color, $amount: 0.145);
 $backdrop-blur: blur(10px);
+$backdrop-blur-alert: blur(1rem);
 
 @mixin font-padding {
     margin: 0.325rem 5%;
@@ -184,6 +186,20 @@ footer {
     // mix-blend-mode: difference;
 }
 
+.visible {
+    visibility: hidden;
+}
+
+.backdrop {
+    // z-index: 99;
+    display: block;
+    position: fixed;
+    width: 100%;
+    bottom: 0px;
+    left: 0px;
+    // mix-blend-mode: difference;
+}
+
 #head-elements {
     margin-block: 1rem;
     display: flex;
@@ -229,6 +245,68 @@ div.line {
     position: absolute;
     bottom: 0%;
     margin: $body-standard-margin;
+}
+
+div#alertContainer {
+    background-color: rgba(0, 0, 0, 0.2);
+    position: fixed;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    #alert {
+        background-color: transparentize($color: $text-field-color, $amount: 0.145);
+        backdrop-filter: $backdrop-blur;
+        // background-color: red;
+        border-radius: 0.85rem;
+        position: fixed;
+        width: calc((100% - (7.75%) * 2));
+        height: 9.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        #alertMessage {
+            padding-top: 1.25rem;
+            width: fit-content;
+            padding-inline: 7.5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #messageTitle {
+            font-family: $font;
+            font-size: $paragraph-font-size;
+            font-weight: 600;
+            text-align: center;
+            margin: 0px;
+        }
+        #messageBody {
+            text-align: center;
+            margin: 0px;
+            padding-top: 0.2rem;
+            font-size: 0.8rem;
+            word-spacing: 0.25px;
+            line-height: 1rem;
+        }
+        .alertButton {
+            background-color: transparent;
+            border: none;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            flex: 1;
+            color: $hyperlink-color;
+        }
+        #alertOptions {
+            // background-color: red;
+            height: 2.75rem;
+            border-top: $input-span-color 0.5px solid;
+            display: flex;
+            align-items: center;
+        }
+    }
 }
 
 div#login {

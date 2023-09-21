@@ -155,6 +155,18 @@ footer a img {
   left: 0px;
 }
 
+.visible {
+  visibility: hidden;
+}
+
+.backdrop {
+  display: block;
+  position: fixed;
+  width: 100%;
+  bottom: 0px;
+  left: 0px;
+}
+
 #head-elements {
   margin-block: 1rem;
   display: flex;
@@ -198,6 +210,68 @@ div.line {
   position: absolute;
   bottom: 0%;
   margin: 2.5rem 5%;
+}
+
+div#alertContainer {
+  background-color: rgba(0, 0, 0, 0.2);
+  position: fixed;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+div#alertContainer #alert {
+  background-color: rgba(242, 242, 246, 0.855);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  border-radius: 0.85rem;
+  position: fixed;
+  width: 84.5%;
+  height: 9.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+div#alertContainer #alert #alertMessage {
+  padding-top: 1.25rem;
+  width: -moz-fit-content;
+  width: fit-content;
+  padding-inline: 7.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+div#alertContainer #alert #messageTitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 0px;
+}
+div#alertContainer #alert #messageBody {
+  text-align: center;
+  margin: 0px;
+  padding-top: 0.2rem;
+  font-size: 0.8rem;
+  word-spacing: 0.25px;
+  line-height: 1rem;
+}
+div#alertContainer #alert .alertButton {
+  background-color: transparent;
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  flex: 1;
+  color: #3478F6;
+}
+div#alertContainer #alert #alertOptions {
+  height: 2.75rem;
+  border-top: #BCBCC1 0.5px solid;
+  display: flex;
+  align-items: center;
 }
 
 div#login {

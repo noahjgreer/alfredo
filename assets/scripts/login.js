@@ -23,8 +23,17 @@ async function callLogin() {
             pass: passID
         })        
     }).then((request) => {
-        response = request.json();
-    });
+        if (!request.ok) {
+            callAlert('An Error Occurred: ' + request.status, "While processing your request to Login, the server sent back a bad response: " + request.statusText);
+            console.log(request);
+            return Promise.reject(response);
+        } else {
+            response = request.json();
+        }
+    }).catch(reason => {
+        callAlert('An Error Occurred: ' + request.status, "While processing your request to Login, the server sent back a bad response: " + request.statusText);
+        console.log(reason);
+    })
 
-    console.log(response);
+    // console.log(response);
 }
