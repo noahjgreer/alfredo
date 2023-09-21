@@ -28,22 +28,32 @@ body#login h1, body#login h2, body#login p, body#login a {
   margin: 0.325rem 5%;
 }
 
-h1 {
-  font-size: 2.1rem;
-  letter-spacing: 0.175px;
-}
-
-p {
-  line-height: 1.45rem;
-  letter-spacing: 0.0475px;
-}
-
-h1, h2, p, a, button, label {
+h1, h2, h3, p, a, button, label {
   margin-block: 0.25rem;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+}
+
+h1 {
+  font-size: 2.1rem;
+  letter-spacing: 0.175px;
+}
+
+h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  font-weight: normal;
+  margin: 0.35rem 5.5%;
+  letter-spacing: -0.45px;
+  word-spacing: 1.25px;
+  color: #999999;
+}
+
+p {
+  line-height: 1.45rem;
+  letter-spacing: 0.0475px;
 }
 
 label {
@@ -78,6 +88,11 @@ div, header {
   display: flex;
   flex-direction: column;
   max-width: 100%;
+  width: 100%;
+}
+
+section {
+  margin-inline: 0px;
   width: 100%;
 }
 
@@ -185,21 +200,20 @@ div.line {
   margin: 2.5rem 5%;
 }
 
-#login {
-  margin-inline: 5%;
+div#login {
   width: 100%;
   align-items: center;
 }
-#login .input {
+div#login .input {
   flex-direction: row;
   background-color: #F2F2F6;
   display: flex;
 }
-#login .input label {
+div#login .input label {
   min-width: 22.5%;
   max-width: 22.5%;
 }
-#login .input input.input {
+div#login .input input.input {
   background-color: transparent;
   border: none;
   padding: 0.75rem 2.5%;
@@ -209,28 +223,54 @@ div.line {
   width: 100%;
   -webkit-tap-highlight-color: transparent;
 }
-#login .input #input::-moz-placeholder {
+div#login .input #input::-moz-placeholder {
   color: #BCBCC1;
 }
-#login .input #input::placeholder {
+div#login .input #input::placeholder {
   color: #BCBCC1;
 }
-#login input:focus, #login input:hover, #login input:active {
+div#login input:focus, div#login input:hover, div#login input:active {
   outline: none;
 }
 
-.bi-input-container .input {
+.info-container .input {
   margin-block: 0px;
 }
-.bi-input-container .input:nth-of-type(1) {
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
+.info-container .input label {
+  font-weight: 600;
 }
-.bi-input-container .input:nth-last-of-type(1) {
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
+.info-container > div {
+  border-radius: 0px;
+  flex-direction: row;
+  background-color: #F2F2F6;
+  display: flex;
 }
-.bi-input-container .input-span {
+.info-container > div label {
+  min-width: 22.5%;
+  max-width: 22.5%;
+  font-weight: normal;
+}
+.info-container > div .value {
+  background-color: transparent;
+  border: none;
+  margin: 0.75rem 5.5% !important;
+  font-size: 1rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.25px;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  text-align: right;
+  color: #999999;
+}
+.info-container > div:nth-of-type(1) {
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+}
+.info-container > div:nth-last-of-type(1) {
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+.info-container .info-span {
   min-height: 0.5px;
   max-height: 0.5px;
   position: relative;

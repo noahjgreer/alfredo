@@ -1,9 +1,9 @@
 const loginButton = document.getElementById('login-button');
-const inputUser = document.getElementById('userField');
 const inputPass = document.getElementById('passwordField');
+const inputUser = document.getElementById('userField');
 
 async function callLogin() {
-    var userID = inputUser.value;
+    var userID = document.getElementById('userField').value;
     var passID = inputPass.value;
     var response = '';
     console.log(

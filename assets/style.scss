@@ -14,6 +14,7 @@ $text-field-icon-color: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) 
 $text-field-color: #F2F2F6;
 $unselected-icon-color: invert(71%) sepia(0%) saturate(2028%) hue-rotate(183deg) brightness(85%) contrast(92%);;
 $unselected-color: #999999;
+$modal-text-color: #85858A;
 $input-span-color: #BCBCC1;
 $hyperlink-color: #3478F6;
 $backdrop-blur: blur(10px);
@@ -53,11 +54,18 @@ body {
 
 body#login {
     margin: 0px 5% 2rem;
-    // margin-top: -14.075%;
+    // margin-top: -44.125%;
     justify-content: start;
     h1, h2, p, a {
         @include font-padding();
     }
+}
+
+h1, h2, h3, p, a, button, label {
+    // @include font-padding();
+    margin-block: 0.25rem;
+    font-family: $font;
+    user-select: none;
 }
 
 h1 {
@@ -65,16 +73,19 @@ h1 {
     letter-spacing: 0.175px;
 }
 
+h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: normal;
+    margin: 0.35rem 5.5%;
+    letter-spacing: -0.45px;
+    word-spacing: 1.25px;
+    color: $unselected-color;
+}
+
 p {
     line-height: 1.45rem;
     letter-spacing: 0.0475px;
-}
-
-h1, h2, p, a, button, label {
-    // @include font-padding();
-    margin-block: 0.25rem;
-    font-family: $font;
-    user-select: none;
 }
 
 label {
@@ -107,6 +118,11 @@ div, header {
     display: flex;
     flex-direction: column;
     max-width: 100%;
+    width: 100%;
+}
+
+section {
+    margin-inline: 0px;
     width: 100%;
 }
 
@@ -215,8 +231,8 @@ div.line {
     margin: $body-standard-margin;
 }
 
-#login {
-    margin-inline: 5%;
+div#login {
+    // margin-inline: 5%;
     // margin-block: 0rem;
     // margin-block: $medium-div-margin-block;
     width: 100%;
@@ -249,19 +265,45 @@ div.line {
     }
 }
 
-.bi-input-container {
+.info-container {
     .input {
         margin-block: 0px;
+        label {
+            font-weight: 600;
+        }
     }
-    .input:nth-of-type(1) {
-        border-bottom-left-radius: 0px;
-        border-bottom-right-radius: 0px;
+    > div {
+        border-radius: 0px;
+        flex-direction: row;
+        background-color: $text-field-color;
+        display: flex;
+        label {
+            min-width: 22.5%;
+            max-width: 22.5%;
+            font-weight: normal;
+        }
+        .value {
+            background-color: transparent;
+            border: none;
+            margin: 0.75rem 5.5% !important;
+            font-size: $text-field-font-size;
+            font-family: $font;
+            letter-spacing: 0.25px;
+            width: 100%;
+            -webkit-tap-highlight-color: transparent;
+            text-align: right;
+            color: $unselected-color;
+        }
     }
-    .input:nth-last-of-type(1) {
-        border-top-left-radius: 0px;
-        border-top-right-radius: 0px;
+    > div:nth-of-type(1) {
+        border-top-left-radius: $slightly-rounded-radius;
+        border-top-right-radius: $slightly-rounded-radius;
     }
-    .input-span {
+    > div:nth-last-of-type(1) {
+        border-bottom-left-radius: $slightly-rounded-radius;
+        border-bottom-right-radius: $slightly-rounded-radius;
+    }
+    .info-span {
         min-height: 0.5px;
         max-height: 0.5px;
         position: relative;
