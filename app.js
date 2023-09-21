@@ -27,9 +27,10 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
     console.log(req.body);
-    res.write(JSON.stringify({
-        response: "I recieved the request. Just letting you know. I don't know how to pass through a message simply without encoding it into JSON, so I hope you don't mind. I mean, I am sure I could probably figure it out if I gave it the time but I am tired and should probably head to bed now uwu."
-        }));
+    // res.write(JSON.stringify({
+    //response: "I recieved the request. Just letting you know. I don't know how to pass through a message simply without encoding it into JSON, so I hope you don't mind. I mean, I am sure I could probably figure it out if I gave it the time but I am tired and should probably head to bed now uwu."
+//}));
+    res.writeHead(418);
     res.end();
 })
 
