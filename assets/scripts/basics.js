@@ -93,9 +93,13 @@ function createElement(nodetype, id, innertext, className) {
     return node;
 }
 
+
+// Function to call an alert
 function callAlert(messageTitle, messageBody) {
+    preventScroll(true);
     var alertElement = document.createElement('div');
-    alertElement.setAttribute('id', 'alertContainer');
+    alertElement.setAttribute('class', 'alertContainer');
+    alertElement.setAttribute('id', generateID(6));
     alertElement.innerHTML = `
     <div id='alert'> 
         <div id="alertMessage">
@@ -107,7 +111,7 @@ function callAlert(messageTitle, messageBody) {
         </p>
         </div>
         <div id="alertOptions">
-            <button class="alertButton" id="OK" onclick="console.log('hit')">
+            <button class="alertButton" id="OK" onclick="dismissAlert(${alertElement.getAttribute('id')})">
                 OK
             </button>
         </div>
@@ -119,7 +123,41 @@ function callAlert(messageTitle, messageBody) {
     console.log(alertElement)
 }
 
+function dismissAlert(caller) {
+    document.getElementById(caller).querySelector(`.alertButton`).classList.add('tapped');
+    document.getElementById(caller).classList.add('dismissed');
+
+    document.getElementById(caller).addEventListener('animationend', (event) => {
+        if (event.animationName == 'alertOut') {
+            document.getElementById(caller).remove();
+        }
+    })
+    preventScroll(false);
+}
 //#endregion
+
+// Function to Generate a random 6 digit id
+function generateID(length) {
+    var id = Math.floor(Math.random() * (10 ** length));
+    if (document.getElementById(id)) {
+        generateID(length);
+    } else {
+        return id;
+    }
+}
+
+// Function to prevent scrolling while alert is active
+function preventScroll(bool) {
+    if (bool) document.body.style.touchAction = 'none' 
+    if (!bool) document.body.style.touchAction = 'auto';
+}
+
+
+
+
+
+
+
 
 function intervalLoop() {
     document.querySelector('.img-reference').classList.toggle('visible');

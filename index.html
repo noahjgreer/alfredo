@@ -23,7 +23,7 @@
     <meta name="theme-color" content="#ffffff">
 </head>
 <body id="login">
-    <img src="/assets/images/20230921_010448000_iOS.png" class="img-reference visible">
+    <!-- <img src="/assets/images/20230920_035502000_iOS.png" class="img-reference"> -->
     <div class="special-heading">
         <img src="/assets/icons/favicons/android-chrome-512x512.png" alt="Alfredo Logo" class="icon">
         <h1>Alfredo</h1>
@@ -31,7 +31,7 @@
     </div>
     <section id="login">
         <!-- <h3>User Login</h3> -->
-        <div id="login" class="info-container">
+        <form name="loginForm" class="info-container form" id="loginForm">
             <div id="user" class="input">
                 <label for="user">User</label>
                 <input type="text" name="user" class="input" id="userField" placeholder="Required" inputmode="text" required="true">
@@ -40,12 +40,14 @@
                 <label for="password">Password</label>
                 <input type="password" name="password" class="input" id="passwordField" placeholder="Required" inputmode="text">
             </div>
-        </div>
+        </form>
     </section>
     <div>
         <p id="debug"></p>
     </div>
-    <button type="button" onclick="callLogin()" class="attention-button" id="login-button">Login</button>
+    <!-- <button type="button" onclick="callLogin()" class="attention-button" id="login-button"><img src="/assets/icons/wheel2.svg" class="loading-wheel"></button> -->
+    <button type="button" onclick="callLogin()" class="attention-button" id="login-button"><p>Login</p></button>
+    <!-- <input type="submit" form="loginForm" class="attention-button" id="login-button" value="Login"> -->
 
 </body>
 <script src="/assets/scripts/login.js"></script>
