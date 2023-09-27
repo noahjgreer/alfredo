@@ -8,18 +8,18 @@
 document.addEventListener('touchstart', preventZoom); 
 
 function preventZoom(e) {
-    var t2 = e.timeStamp;
-    var t1 = e.currentTarget.dataset.lastTouch || t2;
-    var dt = t2 - t1;
+    var currentTouch = e.timeStamp;
+    var previousTouch = e.target.dataset.lastTouch || currentTouch;
+    var touchDifference = currentTouch - previousTouch;
     var fingers = e.touches.length;
-    e.currentTarget.dataset.lastTouch = t2;
-  
-    if (!dt || dt > 500 || fingers > 1) return; // not double-tap
-  
+    e.target.dataset.lastTouch = currentTouch;
+    console.log(touchDifference);
+
+    if (!touchDifference || touchDifference > 500 || fingers > 1) return console.log('not double tap'); // not double-tap
+
     e.preventDefault();
     e.target.click();
-  }
-
+}
 // Get document height
 
 const documentHeight = function () {
@@ -33,7 +33,6 @@ const documentHeight = function () {
 }
 
 // Detect if page isn't bigger than the screen, and then disable scrolling
-document.getElementById('debug').innerHTML = (documentHeight() <= window.innerHeight) + new String(documentHeight()) + new String(" " + window.innerHeight) + document.getElementById('debug').innerHTML;
 if (documentHeight() <= window.innerHeight) {
     document.body.style.touchAction = 'none';
 } else {
@@ -62,60 +61,61 @@ infoContainer.forEach((element) => {
 //#endregion
 
 //#region Viewable Debug
-/*
+const enableDebug = false;
 const debugConsole = document.getElementById('debug');
 
-function debugUpdate() {
-    // debugConsole.innerHTML = new String(console.logs, console.errors, console.warns, console.debugs);
+if (enableDebug) {
+    function debugUpdate() {
+        debugConsole.innerHTML = new String(console.logs, console.errors, console.warns, console.debugs);
+    }
+
+    console.defaultLog = console.log.bind(console);
+    console.logs = [];
+    console.log = function(){
+        // default &  console.log()
+        console.defaultLog.apply(console, arguments);
+        // new & array data
+        console.logs.push(Array.from(arguments));
+        
+        debugUpdate();
+    }
+
+    console.defaultError = console.error.bind(console);
+    console.errors = [];
+    console.error = function(){
+        // default &  console.error()
+        console.defaultError.apply(console, arguments);
+        // new & array data
+        console.errors.push(Array.from(arguments));
+
+        debugUpdate();
+
+    }
+
+    console.defaultWarn = console.warn.bind(console);
+    console.warns = [];
+    console.warn = function(){
+        // default &  console.warn()
+        console.defaultWarn.apply(console, arguments);
+        // new & array data
+        console.warns.push(Array.from(arguments));
+
+        debugUpdate();
+
+    }
+
+    console.defaultDebug = console.debug.bind(console);
+    console.debugs = [];
+    console.debug = function(){
+        // default &  console.debug()
+        console.defaultDebug.apply(console, arguments);
+        // new & array data
+        console.debugs.push(Array.from(arguments));
+
+        debugUpdate();
+
+    }
 }
-
-console.defaultLog = console.log.bind(console);
-console.logs = [];
-console.log = function(){
-    // default &  console.log()
-    console.defaultLog.apply(console, arguments);
-    // new & array data
-    console.logs.push(Array.from(arguments));
-    
-    debugUpdate();
-}
-
-console.defaultError = console.error.bind(console);
-console.errors = [];
-console.error = function(){
-    // default &  console.error()
-    console.defaultError.apply(console, arguments);
-    // new & array data
-    console.errors.push(Array.from(arguments));
-
-    debugUpdate();
-
-}
-
-console.defaultWarn = console.warn.bind(console);
-console.warns = [];
-console.warn = function(){
-    // default &  console.warn()
-    console.defaultWarn.apply(console, arguments);
-    // new & array data
-    console.warns.push(Array.from(arguments));
-
-    debugUpdate();
-
-}
-
-console.defaultDebug = console.debug.bind(console);
-console.debugs = [];
-console.debug = function(){
-    // default &  console.debug()
-    console.defaultDebug.apply(console, arguments);
-    // new & array data
-    console.debugs.push(Array.from(arguments));
-
-    debugUpdate();
-
-}
-*/
 //#endregion
 
 //#region Alert

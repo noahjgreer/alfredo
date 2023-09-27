@@ -50,6 +50,7 @@ html {
 
 body {
     margin: $body-standard-margin;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
