@@ -4,6 +4,42 @@
 
 // .setAttribute('draggable', false);
 
+// Prevent Double Tap Zoom
+document.addEventListener('touchstart', preventZoom); 
+
+function preventZoom(e) {
+    var t2 = e.timeStamp;
+    var t1 = e.currentTarget.dataset.lastTouch || t2;
+    var dt = t2 - t1;
+    var fingers = e.touches.length;
+    e.currentTarget.dataset.lastTouch = t2;
+  
+    if (!dt || dt > 500 || fingers > 1) return; // not double-tap
+  
+    e.preventDefault();
+    e.target.click();
+  }
+
+// Get document height
+
+const documentHeight = function () {
+    var body = document.body,
+    html = document.documentElement;
+
+    var height = Math.max( body.scrollHeight, body.offsetHeight, 
+    html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+    return height;
+}
+
+// Detect if page isn't bigger than the screen, and then disable scrolling
+document.getElementById('debug').innerHTML = (documentHeight() <= window.innerHeight) + new String(documentHeight()) + new String(" " + window.innerHeight) + document.getElementById('debug').innerHTML;
+if (documentHeight() <= window.innerHeight) {
+    document.body.style.touchAction = 'none';
+} else {
+    document.body.style.touchAction = 'auto';
+}
+
 //#region Info Container span Separator
 var infoContainer = document.querySelectorAll('.info-container');
 
@@ -95,9 +131,16 @@ function createElement(nodetype, id, innertext, className) {
 
 
 // Function to call an alert
-function callAlert(messageTitle, messageBody) {
+function callAlert(messageTitle, messageBody, specialAction) {
     preventScroll(true);
     var alertElement = document.createElement('div');
+    function getSpecialAction(specialAction) {
+        if (!specialAction == undefined) {
+            return specialAction;
+        } else {
+            return '';
+        }
+    }
     alertElement.setAttribute('class', 'alertContainer');
     alertElement.setAttribute('id', generateID(6));
     alertElement.innerHTML = `
@@ -111,7 +154,7 @@ function callAlert(messageTitle, messageBody) {
         </p>
         </div>
         <div id="alertOptions">
-            <button class="alertButton" id="OK" onclick="dismissAlert(${alertElement.getAttribute('id')})">
+            <button class="alertButton" id="OK" onclick="dismissAlert(${alertElement.getAttribute('id')}); ${getSpecialAction(specialAction)}">
                 OK
             </button>
         </div>
@@ -120,7 +163,7 @@ function callAlert(messageTitle, messageBody) {
 `
     document.body.appendChild(alertElement);    
 
-    console.log(alertElement)
+    return alertElement.getAttribute('id');
 }
 
 function dismissAlert(caller) {
@@ -134,6 +177,7 @@ function dismissAlert(caller) {
     })
     preventScroll(false);
 }
+
 //#endregion
 
 // Function to Generate a random 6 digit id
