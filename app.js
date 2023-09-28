@@ -11,6 +11,8 @@ const { json } = require('body-parser');
 const port = 3000;
 const httpsPort = 3001;
 
+const databaseDir = 'Z:/Web/Private/alfredo/users.json'
+
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 //app.use(bodyParser.urlencoded({extended: false}));
@@ -27,45 +29,105 @@ app.get('/', (req, res) => {
     }
 })
 
-app.post('/', (req, res) => {
-    var response;
-    checkDatabaseForCreds(req.body.username, req.body.password).then((feedback) => {
-        console.log(feedback);
-        // Search Feedback for username and password
-        for (var i = 0; i < feedback.users.length; i++) {
-            console.log(req.body.name + feedback.users[i].name + req.body.pass + feedback.users[i].password);
-            if (req.body.name == feedback.users[i].name && req.body.pass == feedback.users[i].password) {
-                console.log("Valid user!" + feedback.users[i].name);
-
-                assignToken(i);
-                break;
+app.post('/', async (req, res) => {
+    try {
+        const check = await credentialHandler(req.body.name, req.body.pass).then(data => {
+            if (data == undefined) {
+                res.status(401);
+                res.json({
+                    token: "Invalid",
+                });
+                res.end();
             } else {
-                console.log("You are not logged in.");
+                console.log(data);
+                res.status(200);
+                res.json({
+                    token: data,
+                });
+                res.end();
+
             }
-        }
-    });
-    console.log(req.body.name);
-    console.log(response);
-    res.writeHead(200);
-    res.write(JSON.stringify({
-    response: "I recieved the request. Just letting you know. I don't know how to pass through a message simply without encoding it into JSON, so I hope you don't mind. I mean, I am sure I could probably figure it out if I gave it the time but I am tired and should probably head to bed now uwu."
-}));
+        });
+        
+    } catch (err) {
+        console.log(err);
+    }
+    /*
+    var response;
+    var check = await credentialHandler(req.body.name, req.body.pass);
+
+    res.json(JSON.stringify({
+        token: check,
+    }));
     res.end();
+    //console.log(req.body.name);
+    //console.log(response);
+
+    //res.writeHead(200);
+    
+    res.write(JSON.stringify({
+        response: "faat",
+    }));
+    await res.write(JSON.stringify({
+        token: check,
+    })).then(cb => {
+        res.end();
+
+    }
+    );*/
+    
 })
 
-async function checkDatabaseForCreds(username, password) {
-    try {
-        const data = await fsp.readFile('Z:/Web/Private/alfredo/users.json', 'utf8');
-        const database = JSON.parse(data);
-        return database;
-    } catch (err) {
-        console.error(err + " Uh oh, stinky!");
+async function credentialHandler(username, password) {
+    var database = await fsp.readFile(databaseDir, 'utf8');
+    var users = await JSON.parse(database); // Read the data
+    var user;
+    var userIndex;
+    var userToken;
+    
+    // Search for the user in the database
+    for (var i = 0; i < users.length; i++) {
+        if (username == users[i].name && password == users[i].password) {
+            console.log("Valid user!" + users[i].name);
+            console.log(users);
+            users[i].token = tokenGen();
+            userToken = users[i].token;
+
+            users = JSON.stringify(users, null, 4);
+
+            fs.writeFile(databaseDir, users, (err) => {
+                 
+            });
+            
+            return userToken;
+            break;
+        }
+        if (i == users.length - 1) {
+            console.log("Invalid user!");
+            return undefined;
+            break;
+        }
     }
 }
 
-async function assignToken(userLocation) {
+function tokenGen() {
+    var characters = 'abcdefghijklmnoqrstuvwxyz0123456789';
+    var results = '';
+    var length = characters.length;
+
+    var check = 2;
+    for (i=0; i<=26; i++) {
+        var mix = characters.charAt(Math.floor(Math.random() * length));     
+        if (mix.match(/[a-z]/i) && check>0) {
+            mix =  mix.toUpperCase();
+            check --;
+        }
+    var newString = results += mix;
+    }
+    return newString;
 }
 
+//credentialHandler("Alfredo", "password");
 
 
 // Server Starting
