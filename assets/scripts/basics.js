@@ -5,6 +5,7 @@
 // .setAttribute('draggable', false);
 
 // Prevent Double Tap Zoom
+/*
 document.addEventListener('touchstart', preventZoom); 
 
 function preventZoom(e) {
@@ -13,13 +14,13 @@ function preventZoom(e) {
     var touchDifference = currentTouch - previousTouch;
     var fingers = e.touches.length;
     e.target.dataset.lastTouch = currentTouch;
-    console.log(touchDifference);
 
-    if (!touchDifference || touchDifference > 500 || fingers > 1) return console.log('not double tap'); // not double-tap
+    if (!touchDifference || touchDifference > 500 || fingers > 1) return; // not double-tap
 
     e.preventDefault();
     e.target.click();
 }
+*/
 // Get document height
 
 const documentHeight = function () {
@@ -64,6 +65,18 @@ infoContainer.forEach((element) => {
 const enableDebug = false;
 const debugConsole = document.getElementById('debug');
 
+// Route console errors to an alert using the callAlert function
+window.addEventListener("error", (event) => {
+    callAlert('An error occurred', `${event.type}: ${event.message}\n`);
+    console.log(event);
+});  
+
+window.onerror = function (message, source, lineno, colno, error) {
+    // Your custom function to handle errors goes here
+    console.error(message);
+}
+
+// Handle console logs in the visible debug element
 if (enableDebug) {
     function debugUpdate() {
         debugConsole.innerHTML = new String(console.logs, console.errors, console.warns, console.debugs);
@@ -133,16 +146,21 @@ function createElement(nodetype, id, innertext, className) {
 // Function to call an alert
 function callAlert(messageTitle, messageBody, specialAction) {
     preventScroll(true);
+    console.log(specialAction)
     var alertElement = document.createElement('div');
     function getSpecialAction(specialAction) {
-        if (!specialAction == undefined) {
-            return specialAction;
+        if (specialAction) {
+            // if (specialAction.toString()[0] == "(") {
+            //     return "(" + specialAction + ")();";
+            // }
+            return "(" + specialAction + ")();";
         } else {
             return '';
         }
     }
     alertElement.setAttribute('class', 'alertContainer');
     alertElement.setAttribute('id', generateID(6));
+    var alertID = alertElement.getAttribute('id');
     alertElement.innerHTML = `
     <div id='alert'> 
         <div id="alertMessage">
@@ -154,7 +172,7 @@ function callAlert(messageTitle, messageBody, specialAction) {
         </p>
         </div>
         <div id="alertOptions">
-            <button class="alertButton" id="OK" onclick="dismissAlert(${alertElement.getAttribute('id')}); ${getSpecialAction(specialAction)}">
+            <button class="alertButton" id="OK" onclick="${getSpecialAction(specialAction)} dismissAlert(${alertID});">
                 OK
             </button>
         </div>

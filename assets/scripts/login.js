@@ -1,9 +1,10 @@
+// Defining and assigning element variables
 const loginButton = document.getElementById('login-button');
 const loginForm = document.getElementById('loginForm');
 const inputPass = document.getElementById('passwordField');
 const inputUser = document.getElementById('userField');
 
-// Form Action
+// Detect Enter Key Press during Input
 loginForm.addEventListener('keyup', (event) => {
     if (event.keyCode == 13 || event.key == "Enter") { 
         document.activeElement.blur();
@@ -11,40 +12,42 @@ loginForm.addEventListener('keyup', (event) => {
     }
 })
 
+// Dismiss Keyboard Focus
 loginForm.addEventListener('submit', (event) => {
     document.activeElement.blur();
     event.preventDefault();
     callLogin();
 })
 
-async function callLogin() {
+// Form Action
+function callLogin() {
+    // Set Button to Processing
     loginButton.innerHTML = '<img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">';
     loginButton.classList.add('processing');
+    // Listen for Login Button Reversion
+    function revertLoginButton() {
+        loginButton.style.transition = 'background-color 0.2s ease-out';
+        loginButton.classList.remove('processing');
 
+        loginButton.innerHTML = 'Login';
+    }
+
+    // Handle Empty Fields
     for (let i = 0; i < loginForm.elements.length; i++) {
         if (loginForm.elements[i].value == '') {
-            let alertID = callAlert('Missing Field', 'Please fill in all fields before submitting.');
-
-            // Detect Alert Dismissal
-            document.getElementById(alertID).querySelector('.alertButton').addEventListener('click', () => {
-                loginButton.classList.remove('processing');
-                loginButton.innerHTML = 'Login';
-            });
+            let alertID = callAlert('Missing Field', 'Please fill in all fields before submitting.', revertLoginButton);
             return;
         }        
     }
 
+    // Prepare and Fetch Request
+    var abortController = new AbortController();
+    var timeoutId = setTimeout(() => abortController.abort(), 5000);
     var userID = document.getElementById('userField').value;
     var passID = inputPass.value;
-    var response = '';
-    console.log(
-        JSON.stringify({
-            "name": userID,
-            "pass": passID
-        }       
-        )
-    )
-    var request = await fetch('http://192.168.254.64:3000/', {
+    var responseFinal = '';
+    fetch('http://192.168.254.64:3000/', {
+        signal: abortController.signal,
         method: "POST",
         headers: {
             'Content-Type': "application/json"
@@ -53,18 +56,46 @@ async function callLogin() {
             name: userID,
             pass: passID
         })        
-    }).then((request) => {
-        if (!request.ok) {
-            callAlert('An Error Occurred: ' + request.status, "While processing your request to Login, the server sent back a bad response: " + request.statusText);
-            console.log(request);
-            return Promise.reject(response);
+    }).then(response => {
+        console.log(response);
+        if (response == undefined) {
+            callAlert('An Error Occurred:' + "The request is undefined.")
+        }
+        if (!response.ok) {
+            switch (response.status) {
+                case 401:
+                    callAlert('Verification Failed', "Your username or password is incorrect.", revertLoginButton);
+                    console.log(response);
+                    return Promise.reject(responseFinal);
+                    break;
+                default:
+                    callAlert('An Error Occurred: ' + response.status, "While processing your request to Login, the server sent back a bad response: " + response.statusText, revertLoginButton);
+                    console.log(response);
+                    return Promise.reject(responseFinal);
+                    break;
+            }
         } else {
-            response = request.json();
+            responseFinal = response.json();
+            callAlert('Success', "You have successfully logged in.", revertLoginButton);
         }
     }).catch(reason => {
-        callAlert('An Error Occurred: ' + request.status, "While processing your request to Login, the server sent back a bad response: " + request.statusText);
-        console.log(reason);
+        switch (reason.name) {
+            case "AbortError":
+                callAlert('An Error Occurred: ' + reason.name, "While processing your request to Login, the server timed out. Please try again or contact support. \n\n" + new String(!reason.statusText ? reason : reason.statusText), revertLoginButton);
+                console.error(reason);
+                break;
+            default:
+                console.error(reason);
+                break;
+        }
     })
 
     // console.log(response);
 }
+
+// Debug Area
+// document.addEventListener('DOMContentLoaded', () => {
+//     loginForm.elements[0].value = "fat";
+//     loginForm.elements[1].value = "fat";
+//     callLogin();
+// })
