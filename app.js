@@ -90,17 +90,24 @@ async function credentialHandler(username, password) {
         if (username == users[i].name && password == users[i].password) {
             console.log("Valid user!" + users[i].name);
             console.log(users);
-            users[i].token = tokenGen();
-            userToken = users[i].token;
+            if (users[i].token == undefined) {
+                users[i].token = tokenGen();
+                userToken = users[i].token;
 
-            users = JSON.stringify(users, null, 4);
+                users = JSON.stringify(users, null, 4);
 
-            fs.writeFile(databaseDir, users, (err) => {
-                 
-            });
+                fs.writeFile(databaseDir, users, (err) => {
+
+                });
+
+                return userToken;
+                break;
+            } else {
+                userToken = users[i].token;
+                return userToken;
+                break;
+            }
             
-            return userToken;
-            break;
         }
         if (i == users.length - 1) {
             console.log("Invalid user!");
