@@ -1,0 +1,29 @@
+{
+    "pages": [
+        {
+            "name": "Tasks",
+            "icon": "/assets/icons/checklist.svg",
+            "section": "tasks"
+        },
+        {
+            "name": "Routine",
+            "icon": "/assets/icons/clock.svg",
+            "section": "routine"
+        },
+        {
+            "name": "Focus",
+            "icon": "/assets/icons/house.svg",
+            "section": "focus"
+        },
+        {
+            "name": "New",
+            "icon": "/assets/icons/plus.svg",
+            "section": "new"
+        }, 
+        {
+            "name": "Settings",
+            "icon": "/assets/icons/gear.svg",
+            "section": "settings"
+        }
+    ]
+}

@@ -57,7 +57,7 @@ function callLogin() {
             pass: passID
         })        
     }).then(response => {
-        console.log(response);
+        // console.log(response);
         if (response == undefined) {
             callAlert('An Error Occurred:' + "The request is undefined.")
         }
@@ -76,12 +76,17 @@ function callLogin() {
             }
         } else {
             responseFinal = response.json();
-            callAlert('Success', "You have successfully logged in.", revertLoginButton);
+            var token;
+            responseFinal.then(data => {token = data.token}).then(() => {
+                localStorage.setItem('token', token);
+                console.log(localStorage.getItem('token'));
+                window.location.href = 'app.html';
+            });
         }
     }).catch(reason => {
         switch (reason.name) {
             case "AbortError":
-                callAlert('An Error Occurred: ' + reason.name, "While processing your request to Login, the server timed out. Please try again or contact support. \n\n" + new String(!reason.statusText ? reason : reason.statusText), revertLoginButton);
+                callAlert('Request Timed Out', "While processing your request to Login, the server timed out. Please try again or contact support.", revertLoginButton);
                 console.error(reason);
                 break;
             default:

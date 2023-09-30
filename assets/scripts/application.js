@@ -1,24 +1,22 @@
-let footerContent = `
-<footer>
-    <a href="">
-        <img src="/assets/icons/plus.svg" alt="" class="footer-icon">
-        <caption>Add Task</caption>
-    </a>
-    <a href="">
-        <img class="footer-icon" src="/assets/icons/checklist.svg" alt="">
-        <caption>Tasks</caption>
-    </a>        
-    <a href="">
-        <img src="/assets/icons/gear.svg" alt="" class="footer-icon">
-        <caption>Settings</caption>
-    </a>
-</footer>
-`
-let header = document.querySelector('header');
+let footerContent;
 
-function setFooter() {
-    document.querySelector('body').innerHTML += footerContent;
+async function fetchFooterContent() {
+    await fetch('/assets/doc.json')
+    .then(response => response.json())
+    .then(data => {
+        footerContent = document.createElement('footer');
+        data.pages.forEach(element => {
+            footerContent.innerHTML += `
+            <a onclick="loadSection('${element.section}')">
+                <img src="${element.icon}" alt="" class="footer-icon">
+                <caption>${element.name}</caption>
+            </a>`;
+        });
+        document.body.appendChild(footerContent);
+    });
 }
+
+let header = document.querySelector('header');
 
 function isElementInViewport (el) {
 
@@ -57,6 +55,6 @@ function headerVisibilityHandler() {
 //     addEventListener('resize', headerVisibilityHandler, false);
 // }
 
-setFooter();
+// window.addEventListener("scroll", headerVisibilityHandler)
 
-window.addEventListener("scroll", headerVisibilityHandler)
+fetchFooterContent();

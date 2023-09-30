@@ -49,7 +49,9 @@ html {
 }
 
 body {
-    margin: $body-standard-margin;
+    // margin: $body-standard-margin;
+    padding: $body-standard-margin;
+    margin: 0px;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
@@ -60,7 +62,8 @@ body {
 }
 
 body#login {
-    margin: 0px 5% 2rem;
+    padding: 0px 5% 2rem;
+    margin: 0px;
     // margin-top: -44.125%;
     justify-content: start;
     h1, h2, p, a {
@@ -133,7 +136,50 @@ section {
     width: 100%;
 }
 
-#hd1 {
+.section-header {
+    .content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        .profile {
+            width: 2rem;
+            height: 2rem;
+            aspect-ratio: 1/1;
+            border-radius: 100%;
+        }
+    }
+}
+
+.tasklist {
+    display: flex;
+    align-items: stretch;
+    margin-block: $hyperlink-margin-block;
+    .task {
+        background-color: $text-field-color;
+        padding-block: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        border: 0.5px solid $input-span-color;
+        border-radius: $slightly-rounded-radius;
+        align-items: center;
+        margin-block: 0.5rem;
+        h3, p {
+            margin: 0px;
+        }
+        .check {
+            width: 1.25rem;
+            height: 1.25rem;
+            aspect-ratio: 1/1;
+            border-radius: 100%;
+            border: 0.5px solid $input-span-color;
+            background-color: #ffffff;
+            margin-inline: 0.5rem;
+        }
+    }
+}
+
+header {
     background-color: #ffffffee;
     backdrop-filter: $backdrop-blur;
     justify-content: space-between;
@@ -144,27 +190,33 @@ section {
     justify-content: flex-end;
     top: 0;
     left: 0;
+    #content {
+        margin-block: 0.1rem;
+    }
     p {
         text-align: center;
         font-weight: 650;
-        font-size: 1rem;
-        margin-block: 0.5rem;
+        font-size: $paragraph-font-size;
+        letter-spacing: -0.2px;
+        // margin-block: $medium-div-margin-block;
     }
 }
 
 footer {
     display: flex;
-    width: 100% - 10%;
+    width: 100%;
     position: fixed;
     bottom: 0;
     border-top: 0.5px solid $unselected-color;
-    padding: 0.1rem 5%;
+    padding: 0.1rem 0%;
     justify-content: space-around;
     background-color: #ffffffee;
     backdrop-filter: $backdrop-blur;
     .footer-icon {
         width: 1.5rem;
+        height: 1.5rem;
         padding-block: 0.275rem;
+        aspect-ratio: 1/1;
     }
     a {
         display: flex;
@@ -185,7 +237,7 @@ footer {
     z-index: 99;
     position: fixed;
     width: 100%;
-    opacity: 100%;
+    // opacity: 50%;
     bottom: 0%;
     left: 0px;
     // mix-blend-mode: difference;
@@ -278,6 +330,7 @@ div.alertContainer {
     display: flex;
     height: 100%;
     width: 100%;
+    top: 0%;
     align-items: center;
     justify-content: center;
     animation: alertInContainer 0.2s ease-out;

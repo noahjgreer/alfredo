@@ -13,7 +13,8 @@ html {
 }
 
 body {
-  margin: 2.5rem 5%;
+  padding: 2.5rem 5%;
+  margin: 0px;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
@@ -22,7 +23,8 @@ body {
 }
 
 body#login {
-  margin: 0px 5% 2rem;
+  padding: 0px 5% 2rem;
+  margin: 0px;
   justify-content: start;
 }
 body#login h1, body#login h2, body#login p, body#login a {
@@ -97,7 +99,48 @@ section {
   width: 100%;
 }
 
-#hd1 {
+.section-header .content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.section-header .content .profile {
+  width: 2rem;
+  height: 2rem;
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+}
+
+.tasklist {
+  display: flex;
+  align-items: stretch;
+  margin-block: 0.75rem;
+}
+.tasklist .task {
+  background-color: #F2F2F6;
+  padding-block: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  border: 0.5px solid #BCBCC1;
+  border-radius: 0.75rem;
+  align-items: center;
+  margin-block: 0.5rem;
+}
+.tasklist .task h3, .tasklist .task p {
+  margin: 0px;
+}
+.tasklist .task .check {
+  width: 1.25rem;
+  height: 1.25rem;
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+  border: 0.5px solid #BCBCC1;
+  background-color: #ffffff;
+  margin-inline: 0.5rem;
+}
+
+header {
   background-color: rgba(255, 255, 255, 0.9333333333);
   -webkit-backdrop-filter: blur(10px);
           backdrop-filter: blur(10px);
@@ -110,20 +153,23 @@ section {
   top: 0;
   left: 0;
 }
-#hd1 p {
+header #content {
+  margin-block: 0.1rem;
+}
+header p {
   text-align: center;
   font-weight: 650;
-  font-size: 1rem;
-  margin-block: 0.5rem;
+  font-size: 1.05rem;
+  letter-spacing: -0.2px;
 }
 
 footer {
   display: flex;
-  width: 90%;
+  width: 100%;
   position: fixed;
   bottom: 0;
   border-top: 0.5px solid #999999;
-  padding: 0.1rem 5%;
+  padding: 0.1rem 0%;
   justify-content: space-around;
   background-color: rgba(255, 255, 255, 0.9333333333);
   -webkit-backdrop-filter: blur(10px);
@@ -131,7 +177,9 @@ footer {
 }
 footer .footer-icon {
   width: 1.5rem;
+  height: 1.5rem;
   padding-block: 0.275rem;
+  aspect-ratio: 1/1;
 }
 footer a {
   display: flex;
@@ -151,7 +199,6 @@ footer a img {
   z-index: 99;
   position: fixed;
   width: 100%;
-  opacity: 100%;
   bottom: 0%;
   left: 0px;
 }
@@ -239,6 +286,7 @@ div.alertContainer {
   display: flex;
   height: 100%;
   width: 100%;
+  top: 0%;
   align-items: center;
   justify-content: center;
   animation: alertInContainer 0.2s ease-out;
