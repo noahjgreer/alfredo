@@ -13,10 +13,12 @@ $hyperlink-margin-block: 0.75rem;
 $attention-button-padding: 1rem 0px;
 $text-field-icon-color: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) brightness(96%) contrast(84%);
 $text-field-color: #F2F2F6;
-$unselected-icon-color: invert(71%) sepia(0%) saturate(2028%) hue-rotate(183deg) brightness(85%) contrast(92%);;
+$unselected-icon-color: invert(71%) sepia(0%) saturate(2028%) hue-rotate(183deg) brightness(85%) contrast(92%);
+$hyperlink-icon-color: invert(32%) sepia(99%) saturate(1213%) hue-rotate(203deg) brightness(104%) contrast(93%);
 $unselected-color: #999999;
 $modal-text-color: #85858A;
 $input-span-color: #BCBCC1;
+$list-span-color: #C6C6C8;
 $hyperlink-color: #3478F6;
 $backdrop-transparentize: transparentize($color: $text-field-color, $amount: 0.145);
 $backdrop-blur: blur(10px);
@@ -59,6 +61,7 @@ body {
     // min-height: 100%;
     // height: 100%;
     flex: 1;
+    // transition: background-color 0.1s ease-out;
 }
 
 body#login {
@@ -132,6 +135,9 @@ div, form, header {
 }
 
 section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-inline: 0px;
     width: 100%;
 }
@@ -231,14 +237,20 @@ footer {
         }
         color: $unselected-color;
     }
+    a.selected {
+        color: $hyperlink-color;
+        img {
+            filter: $hyperlink-icon-color;
+        }
+    }
 }
 
 .img-reference {
     z-index: 99;
     position: fixed;
     width: 100%;
-    // opacity: 50%;
-    bottom: 0%;
+    opacity: 50%;
+    bottom: -1.05rem;
     left: 0px;
     // mix-blend-mode: difference;
 }
@@ -426,6 +438,44 @@ div.alertContainer {
     input:focus, input:hover, input:active
     {
         outline: none;
+    }
+}
+
+.list {
+    width: 100% + $body-standard-margin-inline*2.25;
+    max-width: 100% + $body-standard-margin-inline*2.25;
+    ul {
+        display: flex;
+        list-style-type: none;
+        padding: 0px;
+        margin: 0px;
+        flex-direction: column;
+        border-block: 0.5px solid $list-span-color;
+        background-color: white;
+        p {
+            line-height: 1.435rem;
+            font-size: 1.05125rem;
+        }
+        li {
+            margin-left: $body-standard-margin-inline;
+            padding-right: $body-standard-margin-inline;
+            padding-block: 0.425rem;
+            border-bottom: 0.5px solid $list-span-color;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            .value {
+                color: $unselected-color;
+                word-break: break-all;
+            }
+            .code {
+                text-transform: uppercase;
+                font-family: ui-monospace;
+            }
+        }
+        li:last-child {
+            border-bottom: none;
+        }
     }
 }
 

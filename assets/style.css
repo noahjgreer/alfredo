@@ -95,6 +95,9 @@ div, form, header {
 }
 
 section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-inline: 0px;
   width: 100%;
 }
@@ -194,12 +197,19 @@ footer a {
 footer a img {
   filter: invert(71%) sepia(0%) saturate(2028%) hue-rotate(183deg) brightness(85%) contrast(92%);
 }
+footer a.selected {
+  color: #3478F6;
+}
+footer a.selected img {
+  filter: invert(32%) sepia(99%) saturate(1213%) hue-rotate(203deg) brightness(104%) contrast(93%);
+}
 
 .img-reference {
   z-index: 99;
   position: fixed;
   width: 100%;
-  bottom: 0%;
+  opacity: 50%;
+  bottom: -1.05rem;
   left: 0px;
 }
 
@@ -380,6 +390,44 @@ div.alertContainer #alert #alertOptions :first-child {
 }
 .info-container.form input:focus, .info-container.form input:hover, .info-container.form input:active {
   outline: none;
+}
+
+.list {
+  width: 111.25%;
+  max-width: 111.25%;
+}
+.list ul {
+  display: flex;
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+  flex-direction: column;
+  border-block: 0.5px solid #C6C6C8;
+  background-color: white;
+}
+.list ul p {
+  line-height: 1.435rem;
+  font-size: 1.05125rem;
+}
+.list ul li {
+  margin-left: 5%;
+  padding-right: 5%;
+  padding-block: 0.425rem;
+  border-bottom: 0.5px solid #C6C6C8;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.list ul li .value {
+  color: #999999;
+  word-break: break-all;
+}
+.list ul li .code {
+  text-transform: uppercase;
+  font-family: ui-monospace;
+}
+.list ul li:last-child {
+  border-bottom: none;
 }
 
 .info-container .input {

@@ -79,7 +79,7 @@ function callLogin() {
             var token;
             responseFinal.then(data => {token = data.token}).then(() => {
                 localStorage.setItem('token', token);
-                console.log(localStorage.getItem('token'));
+                localStorage.setItem('name', userID + " " + passID);
                 window.location.href = 'app.html';
             });
         }

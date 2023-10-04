@@ -34,11 +34,14 @@ const documentHeight = function () {
 }
 
 // Detect if page isn't bigger than the screen, and then disable scrolling
-if (documentHeight() <= window.innerHeight) {
-    document.body.style.touchAction = 'none';
-} else {
-    document.body.style.touchAction = 'auto';
+function scrollabilityUpdate() {
+    if (documentHeight() <= window.innerHeight) {
+        document.body.style.touchAction = 'none';
+    } else {
+        document.body.style.touchAction = 'auto';
+    }
 }
+scrollabilityUpdate();
 
 //#region Info Container span Separator
 var infoContainer = document.querySelectorAll('.info-container');

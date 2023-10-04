@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body style="background-color: #F2F2F6;">
+        <div class="section-header">
+            <div class="content">
+                <h1>Settings</h1>
+                <!-- <a class="profile">
+                    <img src="/assets/icons/user-default.svg" alt="Your Profile">
+                </a> -->
+            </div>
+            <!-- <div class="line"></div> -->
+        </div>
+        <div class="list">
+            <h3>User Data</h3>
+            <ul>
+                <li>
+                    <p class="label" id="user">User's Name</p>
+                    <p class="value" id="user">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+            </ul>
+
+            <h3>Application Data</h3>
+            <ul>
+                <li>
+                    <p class="label" id="version">Version</p>
+                    <p class="value" id="version">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+                <li>
+                    <p class="label" id="commit">Commit ID</p>
+                    <p class="value code" id="commit">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+            </ul>
+        </div>
+        
+    <script>
+        var versionNumber;
+
+        // Set basic variables
+        document.querySelector("#user.value").innerHTML = localStorage.getItem("name");
+
+
+        // Get latest commit from Github API using fetch(), repo: noahjgreer/alfredo
+        fetch('https://api.github.com/repos/noahjgreer/alfredo/commits')
+            .then(response => response.json())
+            .then(data => {
+                // Set latest commit to variable
+                var version = data[0].commit.message.split('\n')[0];
+                var commit = data[0].sha;
+                console.log(version);
+
+                // Set latest commit to HTML
+                document.querySelector("#version.value").innerHTML = version;
+                document.querySelector("#commit.value").innerHTML = commit;
+            });
+    </script>
+    </body>
+</html>
