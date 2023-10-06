@@ -3,6 +3,7 @@ const loginButton = document.getElementById('login-button');
 const loginForm = document.getElementById('loginForm');
 const inputPass = document.getElementById('passwordField');
 const inputUser = document.getElementById('userField');
+var fetchLoc = "muffinmode.net";
 
 // Detect Enter Key Press during Input
 loginForm.addEventListener('keyup', (event) => {
@@ -46,54 +47,66 @@ function callLogin() {
     var userID = document.getElementById('userField').value;
     var passID = inputPass.value;
     var responseFinal = '';
-    fetch('http://192.168.254.64:3000/', {
-        signal: abortController.signal,
-        method: "POST",
-        headers: {
-            'Content-Type': "application/json"
-        },
-        body: JSON.stringify({
-            name: userID,
-            pass: passID
-        })        
-    }).then(response => {
-        // console.log(response);
-        if (response == undefined) {
-            callAlert('An Error Occurred:' + "The request is undefined.")
-        }
-        if (!response.ok) {
-            switch (response.status) {
-                case 401:
-                    callAlert('Verification Failed', "Your username or password is incorrect.", revertLoginButton);
-                    console.log(response);
-                    return Promise.reject(responseFinal);
-                    break;
-                default:
-                    callAlert('An Error Occurred: ' + response.status, "While processing your request to Login, the server sent back a bad response: " + response.statusText, revertLoginButton);
-                    console.log(response);
-                    return Promise.reject(responseFinal);
-                    break;
-            }
+    fetch('https://api.ipify.org/?format=json')
+    .then(response => response.json()).then(data => {
+        if (data.ip == '47.144.17.228') {
+            fetchLoc = "192.168.254.64";
+            localStorage.setItem('fetchLoc', fetchLoc);
         } else {
-            responseFinal = response.json();
-            var token;
-            responseFinal.then(data => {token = data.token}).then(() => {
-                localStorage.setItem('token', token);
-                localStorage.setItem('name', userID + " " + passID);
-                window.location.href = 'app.html';
-            });
-        }
-    }).catch(reason => {
-        switch (reason.name) {
-            case "AbortError":
-                callAlert('Request Timed Out', "While processing your request to Login, the server timed out. Please try again or contact support.", revertLoginButton);
-                console.error(reason);
-                break;
-            default:
-                console.error(reason);
-                break;
+            fetchLoc = 'muffinmode.net';
+            localStorage.setItem('fetchLoc', fetchLoc);
         }
     })
+    .then(() => {
+            fetch(`https://${fetchLoc}:3001/`, {
+            signal: abortController.signal,
+            method: "POST",
+            headers: {
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify({
+                name: userID,
+                pass: passID
+            })        
+        }).then(response => {
+            // console.log(response);
+            if (response == undefined) {
+                callAlert('An Error Occurred:' + "The request is undefined.")
+            }
+            if (!response.ok) {
+                switch (response.status) {
+                    case 401:
+                        callAlert('Verification Failed', "Your username or password is incorrect.", revertLoginButton);
+                        console.log(response);
+                        return Promise.reject(responseFinal);
+                        break;
+                    default:
+                        callAlert('An Error Occurred: ' + response.status, "While processing your request to Login, the server sent back a bad response: " + response.statusText, revertLoginButton);
+                        console.log(response);
+                        return Promise.reject(responseFinal);
+                        break;
+                }
+            } else {
+                responseFinal = response.json();
+                var token;
+                responseFinal.then(data => {token = data.token}).then(() => {
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('name', userID + " " + passID);
+                    window.location.href = 'app.html';
+                });
+            }
+        }).catch(reason => {
+            switch (reason.name) {
+                case "AbortError":
+                    callAlert('Request Timed Out', "While processing your request to Login, the server timed out. Please try again or contact support.", revertLoginButton);
+                    console.error(reason);
+                    break;
+                default:
+                    console.error(reason);
+                    break;
+            }
+        })});
+    
 
     // console.log(response);
 }

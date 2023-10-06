@@ -25,6 +25,7 @@ $backdrop-blur: blur(10px);
 $backdrop-blur-alert: blur(1rem);
 $webkit-tap-highlight-color: transparentize($color: white, $amount: 0.8);
 $webkit-tap-highlight-color-dark: transparentize($color: black, $amount: 0.8);
+$gapmultiplier: 1.95;
 
 @mixin font-padding {
     margin: 0.325rem 5%;
@@ -90,7 +91,7 @@ h3 {
     font-size: 0.85rem;
     text-transform: uppercase;
     font-weight: normal;
-    margin: 0.35rem 5.5%;
+    margin: 0.35rem 5.125%;
     letter-spacing: -0.45px;
     word-spacing: 1.25px;
     color: $unselected-color;
@@ -250,13 +251,13 @@ footer {
     position: fixed;
     width: 100%;
     opacity: 50%;
-    bottom: -1.05rem;
+    bottom: 0.6rem;
     left: 0px;
     // mix-blend-mode: difference;
 }
 
 .visible {
-    visibility: hidden;
+    opacity: 0%;
 }
 
 .backdrop {
@@ -444,22 +445,25 @@ div.alertContainer {
 .list {
     width: 100% + $body-standard-margin-inline*2.25;
     max-width: 100% + $body-standard-margin-inline*2.25;
+    margin-block: 0.85rem;
     ul {
         display: flex;
         list-style-type: none;
         padding: 0px;
         margin: 0px;
+        margin-block: 0.3rem;
         flex-direction: column;
         border-block: 0.5px solid $list-span-color;
         background-color: white;
         p {
-            line-height: 1.435rem;
+            line-height: 1.425rem;
+            margin: 0px;
             font-size: 1.05125rem;
         }
         li {
             margin-left: $body-standard-margin-inline;
             padding-right: $body-standard-margin-inline;
-            padding-block: 0.425rem;
+            padding-block: 0.7rem;
             border-bottom: 0.5px solid $list-span-color;
             display: flex;
             justify-content: space-between;
@@ -476,6 +480,9 @@ div.alertContainer {
         li:last-child {
             border-bottom: none;
         }
+    }
+    h3 {
+        margin-block: 0rem;
     }
 }
 

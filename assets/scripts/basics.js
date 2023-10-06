@@ -1,3 +1,5 @@
+var debugMode = true;
+
 // console.log(document.getElementsByClassName('img').item);
 
 // document.getElementsByClassName('img').item.setAttribute('draggable', false);
@@ -35,10 +37,14 @@ const documentHeight = function () {
 
 // Detect if page isn't bigger than the screen, and then disable scrolling
 function scrollabilityUpdate() {
-    if (documentHeight() <= window.innerHeight) {
-        document.body.style.touchAction = 'none';
+    if (debugMode) {
+        return;
     } else {
-        document.body.style.touchAction = 'auto';
+        if (documentHeight() <= window.innerHeight) {
+            document.body.style.touchAction = 'none';
+        } else {
+            document.body.style.touchAction = 'auto';
+        }
     }
 }
 scrollabilityUpdate();

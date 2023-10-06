@@ -48,7 +48,7 @@ h3 {
   font-size: 0.85rem;
   text-transform: uppercase;
   font-weight: normal;
-  margin: 0.35rem 5.5%;
+  margin: 0.35rem 5.125%;
   letter-spacing: -0.45px;
   word-spacing: 1.25px;
   color: #999999;
@@ -209,12 +209,12 @@ footer a.selected img {
   position: fixed;
   width: 100%;
   opacity: 50%;
-  bottom: -1.05rem;
+  bottom: 0.6rem;
   left: 0px;
 }
 
 .visible {
-  visibility: hidden;
+  opacity: 0%;
 }
 
 .backdrop {
@@ -395,24 +395,27 @@ div.alertContainer #alert #alertOptions :first-child {
 .list {
   width: 111.25%;
   max-width: 111.25%;
+  margin-block: 0.85rem;
 }
 .list ul {
   display: flex;
   list-style-type: none;
   padding: 0px;
   margin: 0px;
+  margin-block: 0.3rem;
   flex-direction: column;
   border-block: 0.5px solid #C6C6C8;
   background-color: white;
 }
 .list ul p {
-  line-height: 1.435rem;
+  line-height: 1.425rem;
+  margin: 0px;
   font-size: 1.05125rem;
 }
 .list ul li {
   margin-left: 5%;
   padding-right: 5%;
-  padding-block: 0.425rem;
+  padding-block: 0.7rem;
   border-bottom: 0.5px solid #C6C6C8;
   display: flex;
   justify-content: space-between;
@@ -428,6 +431,9 @@ div.alertContainer #alert #alertOptions :first-child {
 }
 .list ul li:last-child {
   border-bottom: none;
+}
+.list h3 {
+  margin-block: 0rem;
 }
 
 .info-container .input {

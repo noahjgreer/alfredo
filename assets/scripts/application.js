@@ -3,7 +3,7 @@ let firstPageLoad = true;
 
 // Autoload Tasks on page load
 // document.addEventListener('load', loadSection('tasks'));
-document.addEventListener('load', loadSection('settings'));
+document.addEventListener('load', loadSection('testificate'));
 
 
 async function fetchFooterContent() {
@@ -75,7 +75,7 @@ async function loadSection(section) {
         tabs.forEach(element => {
             element.classList.remove('selected');
         });
-        tab.classList.add('selected');
+        tab ? tab.classList.add('selected') : null;
         content.setAttribute('id', section);
     
         content.innerHTML = '';
