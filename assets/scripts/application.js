@@ -1,9 +1,10 @@
 let footerContent;
 let firstPageLoad = true;
+let baseThemeColor = document.querySelector('meta[name="theme-color"]');
 
 // Autoload Tasks on page load
 // document.addEventListener('load', loadSection('tasks'));
-document.addEventListener('load', loadSection('testificate'));
+debugMode ? document.addEventListener('load', loadSection('testificate')) : document.addEventListener('load', loadSection('tasks'));
 
 
 async function fetchFooterContent() {
@@ -93,7 +94,8 @@ async function loadSection(section) {
         .then(data => {
             fetchedHTML.innerHTML = data;
             content.innerHTML = fetchedHTML.querySelector('body').innerHTML;
-            document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style'));
+            fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
+            fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');
             if (fetchedHTML.querySelectorAll('script').length > 0) {
                 fetchedHTML.querySelectorAll('script').forEach(element => {
                     var script = document.createElement('script');

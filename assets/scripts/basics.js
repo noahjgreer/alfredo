@@ -1,4 +1,4 @@
-var debugMode = true;
+var debugMode = false;
 
 // console.log(document.getElementsByClassName('img').item);
 
