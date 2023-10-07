@@ -1,30 +1,15 @@
+// Generic References
+console.log(Hammer);
+var hammerDocument = Hammer(document);
 var debugMode = false;
 
-// console.log(document.getElementsByClassName('img').item);
+// Prevent Swipe to Go Back on Mobile
+hammerDocument.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+hammerDocument.on('swipe', function (event) {
+    event.preventDefault();
+});
 
-// document.getElementsByClassName('img').item.setAttribute('draggable', false);
-
-// .setAttribute('draggable', false);
-
-// Prevent Double Tap Zoom
-/*
-document.addEventListener('touchstart', preventZoom); 
-
-function preventZoom(e) {
-    var currentTouch = e.timeStamp;
-    var previousTouch = e.target.dataset.lastTouch || currentTouch;
-    var touchDifference = currentTouch - previousTouch;
-    var fingers = e.touches.length;
-    e.target.dataset.lastTouch = currentTouch;
-
-    if (!touchDifference || touchDifference > 500 || fingers > 1) return; // not double-tap
-
-    e.preventDefault();
-    e.target.click();
-}
-*/
 // Get document height
-
 const documentHeight = function () {
     var body = document.body,
     html = document.documentElement;
@@ -143,11 +128,12 @@ if (enableDebug) {
 //#region Alert
 
 //Simple function made to create nodes
-function createElement(nodetype, id, innertext, className) {
+function createElement(nodetype, attributes, innertext) {
     var node = document.createElement(nodetype);
-    if (id) node.setAttribute('id', id);
+    attributes.forEach(element => {
+        node.setAttribute(element[0], element[1]);
+    });
     if (innertext) node.appendChild(document.createTextNode(innertext));
-    if (className) node.setAttribute('class', className);
     return node;
 }
 
@@ -223,13 +209,6 @@ function preventScroll(bool) {
     if (!bool) document.body.style.touchAction = 'auto';
 }
 
-
-
-
-
-
-
-
 function intervalLoop() {
     document.querySelector('.img-reference').classList.toggle('visible');
     console.log('interval');
@@ -238,3 +217,4 @@ function intervalLoop() {
 }
 
 // intervalLoop();
+

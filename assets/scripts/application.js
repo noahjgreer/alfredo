@@ -69,7 +69,7 @@ async function loadSection(section) {
         }
     } else {
         let content = document.querySelector('section');
-        let fetchedHTML = document.createElement('html');
+        if (section == content.getAttribute('id')) return;        let fetchedHTML = document.createElement('html');
         let tabs = document.querySelectorAll('footer > a');
         let tab = document.querySelector(`footer > a#${section}`);
         console.log(tabs)
