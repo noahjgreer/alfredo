@@ -208,8 +208,8 @@ footer a.selected img {
   z-index: 99;
   position: fixed;
   width: 100%;
-  opacity: 50%;
-  bottom: 0.6rem;
+  opacity: 100%;
+  bottom: -6.5rem;
   left: 0px;
 }
 
@@ -254,6 +254,20 @@ div.line {
   list-style-type: none;
   padding: 0px;
   margin: 0px;
+}
+
+.icon-inline {
+  height: 0.75rem;
+  justify-self: center;
+  align-self: center;
+}
+
+.list-arrow {
+  filter: invert(95%) sepia(4%) saturate(92%) hue-rotate(202deg) brightness(85%) contrast(88%);
+}
+
+p:has(> .icon-inline) {
+  display: flex;
 }
 
 .attention-button {
@@ -413,13 +427,16 @@ div.alertContainer #alert #alertOptions :first-child {
   font-size: 1.05125rem;
 }
 .list ul li {
-  margin-left: 5%;
-  padding-right: 5%;
-  padding-block: 0.7rem;
-  border-bottom: 0.5px solid #C6C6C8;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  min-height: 1.75rem;
+  margin-left: 5%;
+  padding-right: 5%;
+  padding-block: 0.5rem;
+  border-bottom: 0.5px solid #C6C6C8;
   flex-wrap: wrap;
+  font-variation-settings: "opsz" 18.5;
 }
 .list ul li .value {
   color: #999999;
@@ -428,6 +445,8 @@ div.alertContainer #alert #alertOptions :first-child {
 .list ul li .code {
   text-transform: uppercase;
   font-family: ui-monospace;
+  font-size: 1rem;
+  letter-spacing: -0.5px;
 }
 .list ul li:last-child {
   border-bottom: none;
@@ -499,6 +518,7 @@ div.alertContainer #alert #alertOptions :first-child {
 
 .loading-wheel {
   width: 1rem;
+  aspect-ratio: 1;
   animation: loadingWheel 1s steps(8, end) infinite;
 }
 

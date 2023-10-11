@@ -1,7 +1,8 @@
 // Generic References
 console.log(Hammer);
 var hammerDocument = Hammer(document);
-var debugMode = false;
+var debugMode = true;
+// window.location.href = '/assets/images/20231006_002212000_iOS.png';
 
 // Prevent Swipe to Go Back on Mobile
 hammerDocument.get('swipe').set({ direction: Hammer.DIRECTION_ALL });

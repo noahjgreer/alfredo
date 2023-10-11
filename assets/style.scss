@@ -19,6 +19,8 @@ $unselected-color: #999999;
 $modal-text-color: #85858A;
 $input-span-color: #BCBCC1;
 $list-span-color: #C6C6C8;
+$list-icon-color: #C5C5C7;
+$list-icon-icon-color: invert(95%) sepia(4%) saturate(92%) hue-rotate(202deg) brightness(85%) contrast(88%);
 $hyperlink-color: #3478F6;
 $backdrop-transparentize: transparentize($color: $text-field-color, $amount: 0.145);
 $backdrop-blur: blur(10px);
@@ -252,8 +254,8 @@ footer {
     z-index: 99;
     position: fixed;
     width: 100%;
-    opacity: 50%;
-    bottom: 0.6rem;
+    opacity: 100%;
+    bottom: -6.5rem;
     left: 0px;
     // mix-blend-mode: difference;
 }
@@ -303,6 +305,20 @@ div.line {
         padding: 0px;
         margin: 0px;
     }
+}
+
+.icon-inline {
+    height: 0.75rem;
+    justify-self: center;
+    align-self: center;
+}
+
+.list-arrow {
+    filter: $list-icon-icon-color;
+}
+
+p:has(> .icon-inline) {
+    display: flex;
 }
 
 .attention-button {
@@ -463,13 +479,16 @@ div.alertContainer {
             font-size: 1.05125rem;
         }
         li {
-            margin-left: $body-standard-margin-inline;
-            padding-right: $body-standard-margin-inline;
-            padding-block: 0.7rem;
-            border-bottom: 0.5px solid $list-span-color;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            min-height: 1.75rem;
+            margin-left: $body-standard-margin-inline;
+            padding-right: $body-standard-margin-inline;
+            padding-block: 0.5rem;
+            border-bottom: 0.5px solid $list-span-color;
             flex-wrap: wrap;
+            font-variation-settings: "opsz" 18.5;
             .value {
                 color: $unselected-color;
                 word-break: break-all;
@@ -477,6 +496,9 @@ div.alertContainer {
             .code {
                 text-transform: uppercase;
                 font-family: ui-monospace;
+                // Temporary fix for iOS
+                font-size: 1.0rem;
+                letter-spacing: -0.5px;
             }
         }
         li:last-child {
@@ -552,6 +574,7 @@ div.alertContainer {
 
 .loading-wheel {
     width: 1rem;
+    aspect-ratio: 1;
     animation: loadingWheel 1s steps(8, end) infinite;
 }
 
