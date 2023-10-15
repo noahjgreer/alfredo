@@ -6,6 +6,7 @@ document.addEventListener('load', fetchTasks);
 async function fetchTasks(list) {
     if (!list) {
         list = undefined;
+        taskBody.id = "lists";
         taskBody.innerHTML = `
         <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
         `;
@@ -35,6 +36,7 @@ async function fetchTasks(list) {
             return response.json();
         }).then(data => {
             updateTasks(data.response, true);
+            fetchedTasks = data.response;
         })
         // .catch(err => {
         //     callAlert('An Error Occurred', "While fetching your tasks, the server sent back an error: " + err, window.location.href = 'index.html');

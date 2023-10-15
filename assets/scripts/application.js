@@ -70,7 +70,8 @@ async function loadSection(section) {
         }
     } else {
         let content = document.querySelector('section');
-        if (section == content.getAttribute('id')) return;        let fetchedHTML = document.createElement('html');
+        if (section == content.getAttribute('id')) return;        
+        let fetchedHTML = document.createElement('html');
         let tabs = document.querySelectorAll('footer > a');
         let tab = document.querySelector(`footer > a#${section}`);
         tabs.forEach(element => {
@@ -128,16 +129,16 @@ function updateTasks(tasks, isList) {
         tasklist.innerHTML = '';
         let taskElement;
         tasks.forEach(element => {
+            taskElementArgs = [{caller: element.id}];
             taskElement = document.createElement('a');
             taskElement.classList.add('task');
             taskElement.classList.add('list');
             taskElement.style.color = element.color;
-            taskElementIDBase = new String(element.name.toLowerCase().replaceAll(' ', '-') + "-" + element.id);
-            taskElement.id = "list_" + taskElementIDBase;
-            taskElement.setAttribute('onclick', `loadPage('task-page', '#list_${taskElementIDBase}')`);
+            taskElement.id = element.id;
+            taskElement.setAttribute('onclick', `loadPage('task-page', ${JSON.stringify(taskElementArgs)}, ${tasklist.id})`);
             taskElement.innerHTML = `
-            <img src="assets/icons/${element.icon}.svg" alt="" class="icon medium" id="${"icon_" + taskElementIDBase}">
-            <label for="${taskElement.id}" id="${"label_" + taskElementIDBase}">${element.name}</label>
+            <img src="assets/icons/${element.icon}.svg" alt="" class="icon medium">
+            <label for="${taskElement.id}">${element.name}</label>
             `;
             tasklist.appendChild(taskElement);
         });

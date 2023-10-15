@@ -22,6 +22,7 @@ $list-span-color: #C6C6C8;
 $list-icon-color: #C5C5C7;
 $list-icon-icon-color: invert(95%) sepia(4%) saturate(92%) hue-rotate(202deg) brightness(85%) contrast(88%);
 $hyperlink-color: #3478F6;
+$hyperlink-icon-color: invert(31%) sepia(98%) saturate(1634%) hue-rotate(210deg) brightness(104%) contrast(93%);
 $backdrop-transparentize: transparentize($color: $text-field-color, $amount: 0.145);
 $backdrop-blur: blur(10px);
 $backdrop-blur-alert: blur(1rem);
@@ -153,12 +154,29 @@ section {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        > div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
         .profile {
             width: 2rem;
             height: 2rem;
             aspect-ratio: 1/1;
             border-radius: 100%;
         }
+    }
+}
+
+.back-button {
+    display: flex;
+    color: $hyperlink-color;
+    img {
+        filter: $hyperlink-icon-color;
+        height: 1rem;
+    }
+    label {
+        margin: 0px;
     }
 }
 
@@ -601,6 +619,10 @@ div.alertContainer {
     width: 1rem;
     aspect-ratio: 1;
     animation: loadingWheel 1s steps(8, end) infinite;
+}
+
+.mirrored {
+    transform: scaleX(-1);
 }
 
 .dismissed {

@@ -108,11 +108,28 @@ section {
   justify-content: space-between;
   align-items: center;
 }
+.section-header .content > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 .section-header .content .profile {
   width: 2rem;
   height: 2rem;
   aspect-ratio: 1/1;
   border-radius: 100%;
+}
+
+.back-button {
+  display: flex;
+  color: #3478F6;
+}
+.back-button img {
+  filter: invert(31%) sepia(98%) saturate(1634%) hue-rotate(210deg) brightness(104%) contrast(93%);
+  height: 1rem;
+}
+.back-button label {
+  margin: 0px;
 }
 
 .tasklist {
@@ -210,7 +227,7 @@ footer a.selected {
   color: #3478F6;
 }
 footer a.selected img {
-  filter: invert(32%) sepia(99%) saturate(1213%) hue-rotate(203deg) brightness(104%) contrast(93%);
+  filter: invert(31%) sepia(98%) saturate(1634%) hue-rotate(210deg) brightness(104%) contrast(93%);
 }
 
 .img-reference {
@@ -546,6 +563,10 @@ div.alertContainer #alert #alertOptions :first-child {
   width: 1rem;
   aspect-ratio: 1;
   animation: loadingWheel 1s steps(8, end) infinite;
+}
+
+.mirrored {
+  transform: scaleX(-1);
 }
 
 .dismissed {

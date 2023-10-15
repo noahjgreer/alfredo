@@ -133,7 +133,7 @@ function createElement(nodetype, attributes, innertext) {
     attributes.forEach(element => {
         node.setAttribute(element[0], element[1]);
     });
-    if (innertext) node.appendChild(document.createTextNode(innertext));
+    if (innertext) node.innerHTML = innertext;
     return node;
 }
 
@@ -217,9 +217,7 @@ function intervalLoop() {
 }
 
 // Load Pages in iOS page wipe style
-async function loadPage(page, args) {
-    caller = loadPage.caller.name;
-    console.log(caller);
+async function loadPage(page, args, parentID) {
     if (!args) args = "";
     await fetch('/pages/' + page + '.html').then(response => {
         if (!response.ok) {
@@ -237,6 +235,13 @@ async function loadPage(page, args) {
         subBody.setAttribute('id', page);
         subBody.setAttribute('class', 'sub-body');
         subBody.innerHTML = fetchedHTML.querySelector('body').innerHTML;
+        // window.args = args;
+        subBody.querySelector('.section-header > .content > .left > h1').innerHTML = document.querySelector(`#${args[0].caller} label`).innerHTML; 
+        if (parentID) {
+            let backButtonText = parentID.parentNode.querySelector('.section-header > .content').getElementsByTagName('h1')[0].innerHTML;
+            subBody.querySelector(".section-header > .options > .left").insertBefore(createElement('a', [['class', 'back-button'], ['onclick', `loadPage('${parentID}')`]], `<img src="assets/icons/arrow.svg" alt="Back Button" style="width: 1.5rem" class="mirrored icon-inline"><label>${backButtonText}</label>`), subBody.querySelector(".section-header > .options > .left").firstChild);
+        }
+        console.log(subBody);
         document.body.appendChild(subBody);
         fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
         fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');
@@ -252,9 +257,7 @@ async function loadPage(page, args) {
         }
         scrollabilityUpdate();
     }).catch(error => {
-        if (error == "Error: 404") {
-            console.error(error);
-        }
+        console.error(error);
     });
 }
 
