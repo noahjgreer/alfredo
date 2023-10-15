@@ -1,5 +1,4 @@
 // Generic References
-console.log(Hammer);
 var hammerDocument = Hammer(document);
 var debugMode = true;
 // window.location.href = '/assets/images/20231006_002212000_iOS.png';
@@ -215,6 +214,48 @@ function intervalLoop() {
     console.log('interval');
 
     setTimeout(intervalLoop, 500);
+}
+
+// Load Pages in iOS page wipe style
+async function loadPage(page, args) {
+    caller = loadPage.caller.name;
+    console.log(caller);
+    if (!args) args = "";
+    await fetch('/pages/' + page + '.html').then(response => {
+        if (!response.ok) {
+            if (response.status == 404) {
+                console.error(response);
+                throw new Error(response.status);
+            }
+        } else {
+            return response.text();
+        }
+    }).then(data => {
+        let fetchedHTML = document.createElement('html');
+        fetchedHTML.innerHTML = data;
+        let subBody = document.createElement('section');
+        subBody.setAttribute('id', page);
+        subBody.setAttribute('class', 'sub-body');
+        subBody.innerHTML = fetchedHTML.querySelector('body').innerHTML;
+        document.body.appendChild(subBody);
+        fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
+        fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');
+        if (fetchedHTML.querySelectorAll('script').length > 0) {
+            fetchedHTML.querySelectorAll('script').forEach(element => {
+                var script = document.createElement('script');
+                element.getAttribute('src') ? script.setAttribute('src', element.getAttribute('src')) : null;
+                script.classList.add('section-script');
+                script.innerHTML = element.innerHTML;
+                document.body.appendChild(script);
+                sectionScripts = document.querySelectorAll('.section-script');
+            });
+        }
+        scrollabilityUpdate();
+    }).catch(error => {
+        if (error == "Error: 404") {
+            console.error(error);
+        }
+    });
 }
 
 // intervalLoop();

@@ -1,10 +1,11 @@
 let footerContent;
 let firstPageLoad = true;
 let baseThemeColor = document.querySelector('meta[name="theme-color"]');
+let sectionScripts = document.querySelectorAll('.section-script');
 
 // Autoload Tasks on page load
 // document.addEventListener('load', loadSection('tasks'));
-debugMode ? document.addEventListener('load', loadSection('testificate')) : document.addEventListener('load', loadSection('tasks'));
+debugMode ? document.addEventListener('load', loadSection('tasks')) : document.addEventListener('load', loadSection('tasks'));
 
 
 async function fetchFooterContent() {
@@ -72,7 +73,6 @@ async function loadSection(section) {
         if (section == content.getAttribute('id')) return;        let fetchedHTML = document.createElement('html');
         let tabs = document.querySelectorAll('footer > a');
         let tab = document.querySelector(`footer > a#${section}`);
-        console.log(tabs)
         tabs.forEach(element => {
             element.classList.remove('selected');
         });
@@ -92,6 +92,11 @@ async function loadSection(section) {
             }
         })
         .then(data => {
+            // Remove section scripts from previous section
+            sectionScripts.forEach(element => {
+                element.remove();
+            });
+
             fetchedHTML.innerHTML = data;
             content.innerHTML = fetchedHTML.querySelector('body').innerHTML;
             fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
@@ -99,12 +104,14 @@ async function loadSection(section) {
             if (fetchedHTML.querySelectorAll('script').length > 0) {
                 fetchedHTML.querySelectorAll('script').forEach(element => {
                     var script = document.createElement('script');
+                    element.getAttribute('src') ? script.setAttribute('src', element.getAttribute('src')) : null;
+                    script.classList.add('section-script');
                     script.innerHTML = element.innerHTML;
                     document.body.appendChild(script);
+                    sectionScripts = document.querySelectorAll('.section-script');
                 });
             }
             scrollabilityUpdate();
-            console.log(data);
         }).catch(error => {
             if (error == "Error: 404") {
                 callAlert('404: Page Not Found', 'The requested section was not found. Please try again.');
@@ -112,6 +119,28 @@ async function loadSection(section) {
             console.log(error);
             content.innerHTML = '<h1>404</h1>';
         });    
+    }
+}
+
+function updateTasks(tasks, isList) {
+    if (isList) {
+        let tasklist = document.querySelector('#tasks .tasklist');
+        tasklist.innerHTML = '';
+        let taskElement;
+        tasks.forEach(element => {
+            taskElement = document.createElement('a');
+            taskElement.classList.add('task');
+            taskElement.classList.add('list');
+            taskElement.style.color = element.color;
+            taskElementIDBase = new String(element.name.toLowerCase().replaceAll(' ', '-') + "-" + element.id);
+            taskElement.id = "list_" + taskElementIDBase;
+            taskElement.setAttribute('onclick', `loadPage('task-page', '#list_${taskElementIDBase}')`);
+            taskElement.innerHTML = `
+            <img src="assets/icons/${element.icon}.svg" alt="" class="icon medium" id="${"icon_" + taskElementIDBase}">
+            <label for="${taskElement.id}" id="${"label_" + taskElementIDBase}">${element.name}</label>
+            `;
+            tasklist.appendChild(taskElement);
+        });
     }
 }
 

@@ -188,6 +188,14 @@ section {
             margin-inline: 0.5rem;
         }
     }
+    .list {
+        width: unset;
+        border-radius: 0px;
+        border: none;
+        background-color: transparent;
+        margin: 0px;
+        padding-block: 0.75rem;
+    } 
 }
 
 header {
@@ -223,6 +231,7 @@ footer {
     justify-content: space-around;
     background-color: #ffffffee;
     backdrop-filter: $backdrop-blur;
+    z-index: 100;
     .footer-icon {
         width: 1.5rem;
         height: 1.5rem;
@@ -258,6 +267,17 @@ footer {
     bottom: -6.5rem;
     left: 0px;
     // mix-blend-mode: difference;
+}
+
+.sub-body {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    background-color: white;
+    padding: $body-standard-margin;
+    height: calc(100% - (2 * $body-standard-margin-block));
+    width: calc(100% - ($body-standard-margin-inline * 2));
+    top: 0%;
 }
 
 .visible {
@@ -570,6 +590,11 @@ div.alertContainer {
 
 .icon {
     @include icon;
+}
+
+.icon.medium {
+    @include icon;
+    width: 1.25rem;
 }
 
 .loading-wheel {
