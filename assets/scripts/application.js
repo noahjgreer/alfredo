@@ -69,6 +69,9 @@ async function loadSection(section) {
             window.location.href = 'index.html';
         }
     } else {
+        document.querySelectorAll('.sub-body').forEach(element => {
+            element.remove();
+        });
         let content = document.querySelector('section');
         if (section == content.getAttribute('id')) return;        
         let fetchedHTML = document.createElement('html');
