@@ -1,13 +1,6 @@
 // Generic References
 var hammerDocument = Hammer(document);
 var debugMode = true;
-// window.location.href = '/assets/images/20231006_002212000_iOS.png';
-
-// Prevent Swipe to Go Back on Mobile
-hammerDocument.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
-hammerDocument.on('swipe', function (event) {
-    event.preventDefault();
-});
 
 // Get document height
 const documentHeight = function () {
@@ -19,6 +12,114 @@ const documentHeight = function () {
 
     return height;
 }
+
+// Get URL Search Params and link them to the search bar's parameters
+var URLparams = {};
+
+function updateURLParamsObject() {
+    if (!window.location.search == '') {
+        window.location.search.replace('?', '').split('&').forEach(element => {
+            URLparams[element.split('=')[0]] = element.split('=')[1];
+        });  
+    }
+}
+
+function updateURLParams(method, object) {
+    var newURLparams = '?';
+    // Check if the inputted object has a ? at the start, and remove it if it does
+    if (typeof object == 'string' && object[0] == '?') {
+        object = object.slice(1);
+    }
+
+    function URLobjectHandler(object) {
+        if (typeof object == 'string') {
+            // push the new element to the URLparams object
+            // Handle Multiple param entries
+            for (let i = 0; i < object.split(/&|=/).length; i += 2) {
+                const element = object.split(/&|=/);
+                URLparams[element[i]] = element[i + 1];
+            }
+            return;
+        }
+        if (typeof object == 'object' && typeof object[0] == 'string') {
+            // push the new element to the URLparams object
+            URLparams[object[0]] = object[1];
+            return;
+        } else {
+            object.forEach(element => {
+                // push the new element to the URLparams object
+                URLparams[element[0]] = element[1];
+            });
+            return;
+        }
+    }
+    switch (method) {
+        case "add":
+            URLobjectHandler(object);
+            break;
+        case "set":
+            URLparams = {};
+            URLobjectHandler(object);
+            break;
+        case "reset":
+            URLparams = {};
+            break;
+        case "remove":
+            if (typeof object == 'string') {
+                delete URLparams[object];
+            } else {
+                // At this current time this is only used for the page params, so we can assume that the object is an object and not a string
+                Object.keys(URLparams).forEach(element => {
+                    if (element.toString().includes("page")) {
+                        if (JSON.stringify(JSON.parse(decodeURI(URLparams[element]))) == JSON.stringify(object)) {
+                            delete URLparams[element];
+                        }
+                    }
+                });
+            }
+            break;
+        default: 
+            console.error('Invalid method of: "' + method + '"');
+            break;
+    }
+
+    if (Object.keys(URLparams).length) {
+        // URLparams.forEach(element => {
+        //     newURLparams += `${element[0]}=${element[1]}&`;
+        //     console.log(element + URLparams);
+        // });
+
+        for (var key in URLparams) {
+            if (URLparams.hasOwnProperty(key)) {
+                newURLparams += `${key}=${URLparams[key]}&`;
+            }
+        }
+
+        // Use a for...in loop to iterate through the URLparams object
+        // for (const key in URLparams) {
+        //     if (Object.hasOwnProperty.call(URLparams, key)) {
+        //         const element = URLparams[key];
+        //         newURLparams += `${key}=${element}&`;
+        //     }
+        // } 
+
+        // Remove the last & from the string
+        newURLparams = newURLparams.slice(0, -1);
+    } else {
+        newURLparams = '?';
+    }
+        
+    // Update the URL
+    window.history.pushState('', '', newURLparams);
+}
+
+function updateSectionParamsCache(section) {
+    sectionParamsCache[section] = window.location.search + window.location.hash;
+    sessionStorage.setItem('sectionParamsCache', JSON.stringify(sectionParamsCache));
+}
+
+// Refresh the URLparams object every second
+// setInterval(updateURLParamsObject, 1000);
 
 // Detect if page isn't bigger than the screen, and then disable scrolling
 function scrollabilityUpdate() {
@@ -175,7 +276,6 @@ function callAlert(messageTitle, messageBody, specialAction) {
     
 `
     document.body.appendChild(alertElement);    
-
     return alertElement.getAttribute('id');
 }
 
@@ -216,9 +316,25 @@ function intervalLoop() {
     setTimeout(intervalLoop, 500);
 }
 
-// Load Pages in iOS page wipe style
-async function loadPage(page, args, parentID) {
+// Load Pages
+async function loadPage(page, args, isCache) {
+    // Check for Arguments
     if (!args) args = "";
+    let pageID = 0;
+    let pageArgs = args;
+    pageArgs.page = page;
+
+    // Check for existing open pages in the URL params, and then increment the page number to be one above the last page
+    for (let i = 0; i < Object.keys(URLparams).length; i++) {
+        if (Object.keys(URLparams)[i].includes('page')) {
+            pageID++;
+        }
+    }
+
+    if (!isCache) {
+        updateURLParams('add', [`page${pageID}`, JSON.stringify(pageArgs)]);
+    }
+
     await fetch('/pages/' + page + '.html').then(response => {
         if (!response.ok) {
             if (response.status == 404) {
@@ -232,16 +348,24 @@ async function loadPage(page, args, parentID) {
         let fetchedHTML = document.createElement('html');
         fetchedHTML.innerHTML = data;
         let subBody = document.createElement('section');
-        subBody.setAttribute('id', page);
+        subBody.setAttribute('id', page + "-" + pageArgs.id);
         subBody.setAttribute('class', 'sub-body');
         subBody.innerHTML = fetchedHTML.querySelector('body').innerHTML;
         // window.args = args;
-        subBody.querySelector('.section-header > .content > .left > h1').innerHTML = document.querySelector(`#${args[0].caller} label`).innerHTML; 
-        if (parentID) {
-            let backButtonText = parentID.parentNode.querySelector('.section-header > .content').getElementsByTagName('h1')[0].innerHTML;
-            subBody.querySelector(".section-header > .options > .left").insertBefore(createElement('a', [['class', 'back-button'], ['onclick', `loadPage('${parentID}')`]], `<img src="assets/icons/arrow.svg" alt="Back Button" style="width: 1.5rem" class="mirrored icon-inline"><label>${backButtonText}</label>`), subBody.querySelector(".section-header > .options > .left").firstChild);
+        if (page == 'tasklist' && isCache) {
+            if (fetchedTasks != undefined) {
+                fetchedTasks.forEach(element => {
+                    if (args.id == element.id) {
+                        subBody.querySelector('.section-header > .content > .left > h1').innerHTML = element.name; 
+                    }
+                })
+            } else {
+                return null;
+            }
+        } else {
+            subBody.querySelector('.section-header > .content > .left > h1').innerHTML = getNameFromTaskQuery(args.id, false); 
         }
-        console.log(subBody);
+        subBody.querySelector(".section-header > .options > .left").insertBefore(createElement('a', [['class', 'back-button'], ['onclick', `closePage('${JSON.stringify(pageArgs)}')`]], `<img src="assets/icons/arrow.svg" alt="Back Button" style="width: 1.5rem" class="mirrored icon-inline"><label>${getNameFromTaskQuery(args.parentSection, true)}</label>`), subBody.querySelector(".section-header > .options > .left").firstChild);
         document.body.appendChild(subBody);
         fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
         fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');
@@ -259,6 +383,53 @@ async function loadPage(page, args, parentID) {
     }).catch(error => {
         console.error(error);
     });
+}
+
+function closePage(pageArgs) {
+    // Check if the pageArgs uses single quotes instead of double quotes, and then replace them
+    if (pageArgs.includes("'")) {
+        pageArgs = pageArgs.replace(/'/g, '"');
+    } 
+    pageArgs = JSON.parse(pageArgs);
+    let page = "#" + pageArgs.page + "-" + pageArgs.id;
+    updateURLParams('remove', pageArgs);
+    document.querySelector(page).remove();
+}
+
+// Simple function that grabs the classlist of an element and returns it as a selector
+function grabClassesAsSelector(element) {
+    let classes = element.classList;
+    let selector = '';
+    classes.forEach(element => {
+        selector += `.${element}`;
+    });
+    return selector;
+}
+
+function grabElementAsSelector(element) {
+    let selector = '';
+    selector += `${element.tagName.toLowerCase()}${grabClassesAsSelector(element)}#${element.id}`;
+    return selector;
+}
+
+function getNameFromTaskQuery(query, isList) {
+    let taskName;
+    if (isList) {
+        // Lazy patch.
+        if (document.querySelector(`${query} > .section-header > .content > h1`) == undefined) {
+            taskName = "Tasklists";
+        } else {
+            taskName = document.querySelector(`${query} > .section-header > .content > h1`).innerHTML;
+        }
+
+    } else {
+        fetchedTasks.forEach(element => {
+            if (query == element.id) {
+                taskName = element.name;
+            }
+        });
+    }
+    return taskName;
 }
 
 // intervalLoop();

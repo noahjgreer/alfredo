@@ -1,11 +1,14 @@
 let footerContent;
+let defaultSection = 'tasks';
+let cachedTaskLists = {};
 let firstPageLoad = true;
 let baseThemeColor = document.querySelector('meta[name="theme-color"]');
 let sectionScripts = document.querySelectorAll('.section-script');
+let sectionParamsCache = localStorage.getItem('sectionParams') ? JSON.parse(localStorage.getItem('sectionParams')) : {};
 
 // Autoload Tasks on page load
 // document.addEventListener('load', loadSection('tasks'));
-debugMode ? document.addEventListener('load', loadSection('tasks')) : document.addEventListener('load', loadSection('tasks'));
+debugMode ? document.addEventListener('load', loadSection('tasks')) : document.addEventListener('load', loadSection(defaultSection));
 
 
 async function fetchFooterContent() {
@@ -58,6 +61,10 @@ function headerVisibilityHandler() {
 
 async function loadSection(section) {
     if (firstPageLoad) {
+        // Clear URL Params on first page load to prevent unsolved errors.
+        updateURLParams('reset');
+
+        // Check for Token
         if (localStorage.getItem('token') != null) {
             console.log('token found');
             await fetchFooterContent().then(() => {
@@ -69,6 +76,28 @@ async function loadSection(section) {
             window.location.href = 'index.html';
         }
     } else {
+        // Cache Current Section Params
+        previousSection = document.querySelector('section').getAttribute('id') ? document.querySelector('section').getAttribute('id') : defaultSection;
+        updateSectionParamsCache(previousSection);
+
+        // Update Section
+        // Check for section params in cache, otherwise use default
+        if (sectionParamsCache[section]) {
+            updateURLParams('set', sectionParamsCache[section]);
+            // Recall the cached pages
+            for (let i = 0; i < Object.keys(URLparams).length; i++) {
+                const element = Object.keys(URLparams)[i];
+                if (element.includes('page')) {
+                    let elementArgs = JSON.parse(decodeURI(URLparams[Object.keys(URLparams)[i]]));
+                    loadPage(elementArgs.page, elementArgs, true);
+                }
+            }
+        } else {
+            updateURLParams('set', ['tab', section]);
+        }
+
+
+        // updateURLParams('set', ['tab', section]);
         document.querySelectorAll('.sub-body').forEach(element => {
             element.remove();
         });
@@ -132,21 +161,76 @@ function updateTasks(tasks, isList) {
         tasklist.innerHTML = '';
         let taskElement;
         tasks.forEach(element => {
-            taskElementArgs = [{caller: element.id}];
+            var taskElementBase = 'tasklist';
             taskElement = document.createElement('a');
             taskElement.classList.add('task');
             taskElement.classList.add('list');
             taskElement.style.color = element.color;
             taskElement.id = element.id;
-            taskElement.setAttribute('onclick', `loadPage('task-page', ${JSON.stringify(taskElementArgs)}, ${tasklist.id})`);
             taskElement.innerHTML = `
             <img src="assets/icons/${element.icon}.svg" alt="" class="icon medium">
             <label for="${taskElement.id}">${element.name}</label>
             `;
             tasklist.appendChild(taskElement);
+            var taskElementArgs = {
+                parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
+                // Keep in mind that the ID of the tasklist is the ID of the list
+                id: element.id,
+            };
+            taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
+            // console.log(taskElementArgs);
         });
     }
 }
+
+var fetchedTasks;
+
+document.addEventListener('DOMContentLoaded', fetchTasks);
+
+async function fetchTasks(list, taskBody) {
+    if (!list) {
+        taskBody ? taskBody : taskBody = document.querySelector('#tasks .tasklist');
+        list = undefined;
+        taskBody.id = "lists";
+        taskBody.innerHTML = `
+        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
+        `;
+        await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                purpose: "fetchTasks",
+                token: localStorage.getItem('token'),
+                list: list
+            })
+        }).then(response => {
+            if (!response.ok) {
+                switch (response.status) {
+                    case 401:
+                        callAlert('Verification Failed', "Your authentication token is invalid. You will now return to the login page", function () {
+                            window.location.href = 'index.html';
+                        });
+                        console.log(response);
+                        break;
+                    default:
+                        callAlert('An Error Occurred: ' + response.status, "While fetching your tasks, the server sent back a bad response: " + response.statusText);
+                }
+            }
+            return response.json();
+        }).then(data => {
+            updateTasks(data.response, true);
+            fetchedTasks = data.response;
+        })
+
+
+        // .catch(err => {
+        //     callAlert('An Error Occurred', "While fetching your tasks, the server sent back an error: " + err, window.location.href = 'index.html');
+        // })
+    }
+}
+
 
 // if (window.addEventListener) {
 //     addEventListener('DOMContentLoaded', headerVisibilityHandler, false);
