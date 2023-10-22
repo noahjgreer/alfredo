@@ -244,7 +244,7 @@ function updateTasks(tasks, isLists, taskBody) {
             <div class="check"></div>
             <div class="task-content">
                 <p>${element.name}</p>
-                <h3>${element.id}</h3>
+                <h3>${element.description}</h3>
             </div>
             `;
             tasklist.appendChild(taskElement);
