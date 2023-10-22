@@ -1,1 +1,1 @@
-fetchTasks();
+// fetchFromCategory('tasks', undefined, undefined, true);

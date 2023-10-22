@@ -351,10 +351,12 @@ async function loadPage(page, args, isCache) {
         subBody.setAttribute('id', page + "-" + pageArgs.id);
         subBody.setAttribute('class', 'sub-body');
         subBody.innerHTML = fetchedHTML.querySelector('body').innerHTML;
+        console.log(subBody); 
         // window.args = args;
+        fetchFromCategory('tasks', pageArgs.id, subBody.querySelector('.tasklist'), false);
         if (page == 'tasklist' && isCache) {
-            if (fetchedTasks != undefined) {
-                fetchedTasks.forEach(element => {
+            if (Object.keys(fetchedCategories.tasks).length != 0) {
+                fetchedCategories.tasks.forEach(element => {
                     if (args.id == element.id) {
                         subBody.querySelector('.section-header > .content > .left > h1').innerHTML = element.name; 
                     }
@@ -423,7 +425,7 @@ function getNameFromTaskQuery(query, isList) {
         }
 
     } else {
-        fetchedTasks.forEach(element => {
+        fetchedCategories.tasks.forEach(element => {
             if (query == element.id) {
                 taskName = element.name;
             }
