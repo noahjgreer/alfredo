@@ -146,6 +146,7 @@ section {
   border-radius: 0.75rem;
   align-items: center;
   margin-block: 0.5rem;
+  text-align: left;
 }
 .tasklist .task h3, .tasklist .task p {
   margin: 0px;

@@ -113,7 +113,7 @@ function callLogin() {
     var responseFinal = '';
     fetch('https://api.ipify.org/?format=json')
     .then(response => response.json()).then(data => {
-        if (data.ip == '47.144.17.228') {
+        if (data.ip == '47.144.17.228' && navigator.userAgent.match(/iPhone/i)) {
             fetchLoc = "192.168.254.64";
             localStorage.setItem('fetchLoc', fetchLoc);
         } else {

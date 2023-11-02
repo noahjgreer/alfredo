@@ -237,11 +237,11 @@ function updateTasks(tasks, isLists, taskBody) {
         let taskElement;
         tasks.tasks.forEach(element => {
             var taskElementBase = 'task';
-            taskElement = document.createElement('a');
+            taskElement = document.createElement('div');
             taskElement.classList.add('task');
             taskElement.id = element.id;
             taskElement.innerHTML = `
-            <div class="check"></div>
+            <a class="check" onclick="markTaskComplete('${element.id}')"></a>
             <div class="task-content">
                 <p>${element.name}</p>
                 <h3>${element.description}</h3>
@@ -252,7 +252,7 @@ function updateTasks(tasks, isLists, taskBody) {
                 parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
                 id: element.id,
             };
-            taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
+            // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
         });
         console.log(tasklist);
     }
@@ -320,6 +320,7 @@ async function fetchFromCategory(category, list, taskBody, isLists) {
                         });
                     }
                 }
+                console.trace(data.response);
                 updateTasks(data.response, isListsArray, taskBodyCopy);
                 
             })
@@ -341,6 +342,43 @@ async function fetchFromCategory(category, list, taskBody, isLists) {
     }
 }
 
+async function markTaskComplete(taskID) {
+    if (typeof taskID != 'string') {
+        console.error('Invalid taskID');
+        return;
+    } else {
+        await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                purpose: "markTaskComplete",
+                token: localStorage.getItem('token'),
+                taskID: taskID
+            })
+        }).then(response => {
+            if (!response.ok) {
+                switch (response.status) {
+                    case 401:
+                        callAlert('Verification Failed', "Your authentication token is invalid. You will now return to the login page", function () {
+                            window.location.href = 'index.html';
+                        });
+                        console.log(response);
+                        break;
+                    default:
+                        callAlert('An Error Occurred: ' + response.status, "While fetching your tasks, the server sent back a bad response: " + response.statusText);
+                }
+            }
+            console.log(response);
+            return response.ok;
+        }).then(data => {
+            if (data) {
+                document.querySelector(`#${taskID}`).remove();
+            }
+        })
+    }
+}
 
 // if (window.addEventListener) {
 //     addEventListener('DOMContentLoaded', headerVisibilityHandler, false);
