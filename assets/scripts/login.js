@@ -64,7 +64,9 @@ if (localStorage.getItem('token')) {
                         window.location.href = 'app.html';
                     } else {
                         localStorage.removeItem('token');
+                        localStorage.removeItem('uuid');
                         localStorage.removeItem('name');
+                        localStorage.removeItem('settings');
                         return;
                     }
                 });
@@ -152,9 +154,14 @@ function callLogin() {
             } else {
                 responseFinal = response.json();
                 var token;
-                responseFinal.then(data => {token = data.token}).then(() => {
+                var uuid;
+                var fullname;
+                var settings;
+                responseFinal.then(data => {token = data.token; uuid = data.uuid; fullname = data.fullname; settings = data.settings}).then(() => {
                     localStorage.setItem('token', token);
-                    localStorage.setItem('name', userID + " " + passID);
+                    localStorage.setItem('uuid', uuid);
+                    localStorage.setItem('name', fullname);
+                    localStorage.setItem('settings', JSON.stringify(settings));
                     window.location.href = 'app.html';
                 });
             }
@@ -169,8 +176,6 @@ function callLogin() {
                     break;
             }
         })});
-    
-
     // console.log(response);
 }
 

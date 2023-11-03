@@ -13,8 +13,7 @@ let listableSections = ['tasks', 'routines', 'events'];
 
 // Fetch tasks from default section on page load
 async function init() {
-    let taskBody = await loadSection('tasks');
-    console.log(taskBody); // Log the taskBody element to the console
+    let taskBody = await loadSection('settings');
     // fetchFromCategory('tasks', undefined, taskBody, true);
 }
 
@@ -85,16 +84,18 @@ async function loadSection(section) {
     if (firstPageLoad) {
             // Clear URL Params on first page load to prevent unsolved errors.
             updateURLParams('reset');
-            console.log('the big');
 
             // Check for Token
-            if (localStorage.getItem('token') != null) {
-                console.log('token found');
+            if (localStorage.getItem('token') != null && localStorage.getItem('uuid') != null && localStorage.getItem('name') != null && localStorage.getItem('settings') != null) {
                 await fetchFooterContent().then(() => {
                     firstPageLoad = false;
                 });
             } else {
-                console.log('token not found');
+                console.log('something wasnt found');
+                localStorage.removeItem('token');
+                localStorage.removeItem('uuid');
+                localStorage.removeItem('name');
+                localStorage.removeItem('settings');
                 window.location.href = 'index.html';
             }
         }
@@ -189,7 +190,7 @@ async function loadSection(section) {
  * @param {boolean} isLists - A boolean indicating whether the inputted array ("tasks") is a list of tasks, or a list of lists. (Default: false)
  * @returns {void}
  */
-function updateTasks(tasks, isLists, taskBody) {
+async function updateTasks(tasks, isLists, taskBody) {
     // Check if the inputed array "tasks" is a list of tasks, or a list of lists. 
     // If it is a list of lists, then the isLists parameter should be true.
     if (isLists) {
@@ -235,25 +236,33 @@ function updateTasks(tasks, isLists, taskBody) {
         // let tasklist = document.querySelector('#tasks .tasklist');
         tasklist.innerHTML = '';
         let taskElement;
-        tasks.tasks.forEach(element => {
-            var taskElementBase = 'task';
-            taskElement = document.createElement('div');
-            taskElement.classList.add('task');
-            taskElement.id = element.id;
-            taskElement.innerHTML = `
-            <a class="check" onclick="markTaskComplete('${element.id}')"></a>
-            <div class="task-content">
-                <p>${element.name}</p>
-                <h3>${element.description}</h3>
-            </div>
+        // Loop through the provided tasks array, if it contains items
+        if (tasks.tasks.length != 0) {
+            tasks.tasks.forEach(element => {
+                var taskElementBase = 'task';
+                taskElement = document.createElement('div');
+                taskElement.classList.add('task');
+                taskElement.id = element.id;
+                taskElement.innerHTML = `
+                <a class="check" onclick="markTaskComplete('${element.id}')"></a>
+                <div class="task-content">
+                    <p>${element.name}</p>
+                    <h3>${element.description}</h3>
+                </div>
+                `;
+                tasklist.appendChild(taskElement);
+                var taskElementArgs = {
+                    parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
+                    id: element.id,
+                };
+                // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
+            });    
+        } else {
+            // Set a motivational quote on the page instead
+            tasklist.innerHTML = `
+            <p class="subtle">You're all caught up! <br><br> ${await getMotivation()}</p>
             `;
-            tasklist.appendChild(taskElement);
-            var taskElementArgs = {
-                parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
-                id: element.id,
-            };
-            // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
-        });
+        }
         console.log(tasklist);
     }
 }
@@ -270,12 +279,10 @@ function updateTasks(tasks, isLists, taskBody) {
 async function fetchFromCategory(category, list, taskBody, isLists) {
     let listCopy = list;
     let taskBodyCopy = taskBody;
-    console.log(category, listCopy, taskBody, isLists);
 
     switch (category) {
         case 'tasks':
             taskBody ? taskBody : taskBody = document.querySelector('#tasks .tasklist');
-            console.log(taskBody);
             taskBody.id = "lists";
             taskBody.innerHTML = `
             <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
@@ -320,7 +327,6 @@ async function fetchFromCategory(category, list, taskBody, isLists) {
                         });
                     }
                 }
-                console.trace(data.response);
                 updateTasks(data.response, isListsArray, taskBodyCopy);
                 
             })
@@ -343,6 +349,7 @@ async function fetchFromCategory(category, list, taskBody, isLists) {
 }
 
 async function markTaskComplete(taskID) {
+    console.trace("markTaskComplete called");
     if (typeof taskID != 'string') {
         console.error('Invalid taskID');
         return;
@@ -371,13 +378,34 @@ async function markTaskComplete(taskID) {
                 }
             }
             console.log(response);
-            return response.ok;
+            return response.json();
         }).then(data => {
             if (data) {
-                document.querySelector(`#${taskID}`).remove();
+                var taskParent = data.response.taskParent;
+                var wasPreviouslyCompleted = data.response.wasPreviouslyCompleted;
+                if (!wasPreviouslyCompleted) {
+                    fetchFromCategory('tasks', taskParent, document.querySelector(`#tasklist-${taskParent}>.tasklist`), false);
+                } else {
+                    fetchFromCategory('tasks', 'completed', document.querySelector(`#tasklist-completed>.tasklist`), false);
+                    // document.querySelector(`#${taskID}`).remove();
+                }
             }
         })
     }
+}
+
+async function getMotivation() {
+    let response = await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            purpose: "getMotivation"
+        })
+    });
+    let data = await response.json();
+    return data.response;
 }
 
 // if (window.addEventListener) {

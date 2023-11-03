@@ -14,11 +14,37 @@
             <!-- <div class="line"></div> -->
         </div>
         <div class="list">
+            <h3>User Settings</h3>
+            <ul>
+                <li>
+                    <p class="label" id="motivation">Motivation</p>
+                    <a class="value switch" id="motivation" onclick="switchToggle(this, 'updateBool')">
+                        <div class="knob"></div>
+                    </a>
+                    <!-- <p class="value" id="motivation">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p> -->
+                </li>
+            </ul>
+        </div>
+        <div class="list">
             <h3>User Data</h3>
             <ul>
                 <li>
                     <p class="label" id="user">User's Name</p>
                     <p class="value" id="user">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+                <li>
+                    <p class="label" id="token">Token</p>
+                    <p class="value code" id="token">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+                <li>
+                    <p class="label" id="uuid">UUID</p>
+                    <p class="value code" id="uuid">
                         <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
                     </p>
                 </li>
@@ -47,7 +73,27 @@
 
         // Set basic variables
         document.querySelector("#user.value").innerHTML = localStorage.getItem("name");
+        document.querySelector("#token.value").innerHTML = localStorage.getItem("token");
+        document.querySelector("#uuid.value").innerHTML = localStorage.getItem("uuid");
 
+        document.querySelectorAll('.switch').forEach(element => {
+            element.addEventListener('click', () => {
+                element.classList.toggle('active');    
+            });
+        });
+
+        // Update the settings to match the local storage
+        var currentSettings = JSON.parse(localStorage.getItem("settings"));
+        console.log(currentSettings);
+        Object.keys(currentSettings).forEach(setting => {
+            switch (setting) {
+                case "motivation":
+                    document.querySelector("#" + setting + ".switch").classList.toggle('active');
+                    break;
+                default:
+                    break;
+            }
+        });
 
         // Get latest commit from Github API using fetch(), repo: noahjgreer/alfredo
         fetch('https://api.github.com/repos/noahjgreer/alfredo/commits')

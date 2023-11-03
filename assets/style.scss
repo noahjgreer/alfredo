@@ -1,5 +1,6 @@
 // Declarations
 $font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+$font-mono: 'Segoe UI Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 $paragraph-font-size: 1.05rem;
 $text-field-font-size: 1rem;
 $rounded-radius: 100rem;
@@ -20,6 +21,10 @@ $modal-text-color: #85858A;
 $input-span-color: #BCBCC1;
 $list-span-color: #C6C6C8;
 $list-icon-color: #C5C5C7;
+$switch-color: #E9E9EA;
+$switch-color-active: #65C466;
+$switch-transition: all 0.25s cubic-bezier(0, 0, 0.35, 1.25);
+$switch-knob-shadow: 0.5px 2.5px 7.5px -5px rgba(0,0,0,0.65);
 $list-icon-icon-color: invert(95%) sepia(4%) saturate(92%) hue-rotate(202deg) brightness(85%) contrast(88%);
 $hyperlink-color: #3478F6;
 $hyperlink-icon-color: invert(31%) sepia(98%) saturate(1634%) hue-rotate(210deg) brightness(104%) contrast(93%);
@@ -283,7 +288,7 @@ footer {
     position: fixed;
     width: 100%;
     opacity: 100%;
-    bottom: -6.5rem;
+    bottom: 14.95rem;
     left: 0px;
     // mix-blend-mode: difference;
 }
@@ -321,6 +326,34 @@ footer {
 div.line {
     padding-block: 0.125rem;
     border-bottom: $unselected-color solid 0.5px;
+}
+
+.switch {
+    margin: 0px;
+    margin-block: -1.5rem;
+    width: 3.2rem;
+    height: 1.95rem;
+    background-color: $switch-color;
+    border-radius: $rounded-radius;
+    display: flex;
+    align-items: center;
+    transition: $switch-transition;
+    .knob {
+        width: 1.7rem;
+        height: 1.7rem;
+        aspect-ratio: 1/1;
+        background-color: white;
+        border-radius: $rounded-radius;
+        margin: 0.125rem;
+        transition: $switch-transition;
+        box-shadow: $switch-knob-shadow;
+    }
+    &.active {
+        background-color: $switch-color-active;
+        .knob {
+            transform: translateX(1.25rem);
+        }
+    }
 }
 
 .special-heading {
@@ -534,7 +567,7 @@ div.alertContainer {
             }
             .code {
                 text-transform: uppercase;
-                font-family: ui-monospace;
+                font-family: $font-mono;
                 // Temporary fix for iOS
                 font-size: 1.0rem;
                 letter-spacing: -0.5px;
@@ -605,6 +638,12 @@ div.alertContainer {
         filter: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) brightness(96%) contrast(84%);
         margin-inline: 1.25%;
     }
+}
+
+p.subtle {
+    color: $unselected-color;
+    text-align: center;
+    margin-block: 0.25rem;
 }
 
 .icon {

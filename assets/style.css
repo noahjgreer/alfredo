@@ -236,7 +236,7 @@ footer a.selected img {
   position: fixed;
   width: 100%;
   opacity: 100%;
-  bottom: -6.5rem;
+  bottom: 14.95rem;
   left: 0px;
 }
 
@@ -271,6 +271,34 @@ footer a.selected img {
 div.line {
   padding-block: 0.125rem;
   border-bottom: #999999 solid 0.5px;
+}
+
+.switch {
+  margin: 0px;
+  margin-block: -1.5rem;
+  width: 3.2rem;
+  height: 1.95rem;
+  background-color: #E9E9EA;
+  border-radius: 100rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.25s cubic-bezier(0, 0, 0.35, 1.25);
+}
+.switch .knob {
+  width: 1.7rem;
+  height: 1.7rem;
+  aspect-ratio: 1/1;
+  background-color: white;
+  border-radius: 100rem;
+  margin: 0.125rem;
+  transition: all 0.25s cubic-bezier(0, 0, 0.35, 1.25);
+  box-shadow: 0.5px 2.5px 7.5px -5px rgba(0, 0, 0, 0.65);
+}
+.switch.active {
+  background-color: #65C466;
+}
+.switch.active .knob {
+  transform: translateX(1.25rem);
 }
 
 .special-heading {
@@ -482,7 +510,7 @@ div.alertContainer #alert #alertOptions :first-child {
 }
 .list ul li .code {
   text-transform: uppercase;
-  font-family: ui-monospace;
+  font-family: "Segoe UI Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 1rem;
   letter-spacing: -0.5px;
 }
@@ -547,6 +575,12 @@ div.alertContainer #alert #alertOptions :first-child {
 .input .icon {
   filter: invert(53%) sepia(4%) saturate(244%) hue-rotate(201deg) brightness(96%) contrast(84%);
   margin-inline: 1.25%;
+}
+
+p.subtle {
+  color: #999999;
+  text-align: center;
+  margin-block: 0.25rem;
 }
 
 .icon {

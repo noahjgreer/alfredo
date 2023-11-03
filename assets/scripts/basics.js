@@ -434,5 +434,22 @@ function getNameFromTaskQuery(query, isList) {
     return taskName;
 }
 
+function switchToggle(element, event) {
+    switch (event) {
+        case 'updateBool':
+            var elementStatus
+            if (element.classList.contains('active')) {
+                elementStatus = true;
+            } else {
+                elementStatus = false;
+            }
+            var currentSettings = JSON.parse(localStorage.getItem('settings'));
+            currentSettings[element.getAttribute('id')] = elementStatus;
+            localStorage.setItem('settings', JSON.stringify(currentSettings));
+    }
+    console.log(element);
+    console.log(event);
+}
+
 // intervalLoop();
 
