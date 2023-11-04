@@ -7,12 +7,14 @@ const cors = require('cors');
 const app = express();
 const fs = require('fs');
 const fsp = require('fs/promises');
+const console = require('better-console');
 const { json } = require('body-parser');
 const e = require('express');
 const port = 3000;
 const httpsPort = 3001;
 
 const databaseDir = "F:/web-private/alfredo/users.json"
+const motivationDir = "F:/MuffinMode/alfredo-server/mot.json";
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
@@ -32,81 +34,92 @@ app.get('/', (req, res) => {
 
 app.post('/', async (req, res) => {
     try {
+        // Make a fancy Console.Table that will log the request, the purpose, the date, and the information about the client who called the request.
+        if (req.body.token) {
+            console.table([
+                ["Request", "Purpose", "Date", "IP Address", "Token", "User Agent"],
+                [req.method, req.body.purpose, new Date().toISOString(), req.ip, req.body.token, req.get('User-Agent')]
+            ]);
+        }
         switch (req.body.purpose) {
             case "login":
-                const check = await credentialHandler(req.body.name, req.body.pass).then(data => {
+                await credentialHandler(req.body.name, req.body.pass).then(data => {
                     if (data == undefined) {
-                        res.status(401);
-                        res.json({
+                        return res.status(401).json({
                             token: "Invalid Token!",
                         });
-                        res.end();
                     } else {
                         console.log(data);
-                        res.status(200);
-                        res.json({
-                            token: data,
+                        return res.status(200).json({
+                            token: data[0],
+                            uuid: data[1],
+                            fullname: data[2],
+                            settings: data[3],
                         });
-                        res.end();
-
                     }
                 });
                 break;
             case "verifyCache":
-                const verifyCache = await checkTokenCache(req.body.token).then(data => {
-                    res.status(200);
-                    res.json({
+                await checkTokenCache(req.body.token).then(data => {
+                    return res.status(200).json({
                         response: data,
                     });
-                    res.end();
                 });
                 break;
             case "fetchTasks":
-                const fetchTaskFunction = await fetchTasks(req.body.token, req.body.list).then(data => {
-                    res.status(200);
+                await fetchTasks(req.body.token, req.body.list).then(data => {
                     console.log(data);
-                    res.json({
+                    return res.status(200).json({
                         response: data,
                     });
-                    res.end();
                 }).catch(err => {
-                    if (err.message == "Invalid token!") {
-                        res.status(401);
-                        res.json({
-                            response: err.message,
-                        });
-                        res.end();
-                        console.error(err);
-                    } else {
-                        res.status(401);
-                        res.json({
-                            response: err.message,
-                        });
-                        res.end();
-                    }
-                    
-                });
-            case "markTaskComplete":
-                const markTaskCompleteFunction = await markTaskComplete(req.body.token, req.body.taskID).then(data => {
-                    res.status(200);
-                    console.log(data);
-                    res.json({
-                        response: data,
-                    });
-                    res.end();
-                }).catch(err => {
-                    res.status(401);
-                    res.json({
+                    console.error(err);
+                    return res.status(401).json({
                         response: err.message,
                     });
-                    res.end();
+                });
+                break;
+            case "markTaskComplete":
+                await markTaskComplete(req.body.token, req.body.taskID).then(data => {
+                    data ? console.log(data) : null;
+                    return res.status(200).json({
+                        response: {
+                            taskParent: data[0],
+                            wasPreviouslyCompleted: data[1],
+                        },
+                    });
+                }).catch(err => {
                     console.error(err);
+                    return res.status(401).json({
+                        response: err.message,
+                    });
+                });
+                break;
+            case "getMotivation":
+                await getMotivation().then(data => {
+                    return res.status(200).json({
+                        response: data,
+                    });
+                }).catch(err => {
+                    console.error(err);
+                    return res.status(401).json({
+                        response: err.message,
+                    });
+                });
+            case "fetchSettings":
+                await fetchSettings(req.body).then(data => {
+                    return res.status(200).json({
+                        response: data,
+                    });
+                }).catch(err => {
+                    console.error(err);
+                    return res.status(401).json({
+                        response: err.message,
+                    });
                 });
             default:
-                res.status(400);
-                res.end();
-                break;
-        }    
+                return res.status(400);
+        }
     } catch (err) {
         console.log(err);
     }
@@ -161,6 +174,115 @@ function compareArrays(a, b) {
     return true;
 }
 
+async function getMotivation() {
+    return fsp.readFile(motivationDir, 'utf8').then((motivationFile) => {
+        var motivation = JSON.parse(motivationFile);
+        var index = Math.floor(Math.random() * motivation.length);
+        return motivation[index];
+    }).catch(err => {
+        console.log(err);
+    })
+}
+
+/**
+ * Retrieves a user from the database based on the provided input and type.
+ *
+ * @param {string} input - The value to match against. This could be a token or a UUID.
+ * @param {string} type - The type of the input. This determines which property of the user to match against.
+ *                        Possible values are "token", "uuid", and any other string (which will default to "token").
+ * @returns {Promise<Object>} A promise that resolves to the user object if a match is found, or undefined if no match is found.
+ *                            The user object includes all properties of the user, including the token and UUID.
+ * @throws {Error} If there is an error reading from the database file, the promise will be rejected with an Error object.
+ */
+async function getUserFromDatabase(input, type) {
+    // Grab the user from the database file
+    return fsp.readFile(databaseDir, 'utf8').then((userJSON) => {
+        var userJSON = JSON.parse(userJSON);
+        var user;
+        var userIndex;
+
+        switch (type) {
+            case "token":
+                userJSON.forEach(element => {
+                    if (element.token == input) {
+                        user = element;
+                        userIndex = userJSON.indexOf(element);
+                    }
+                });
+                break;
+            case "uuid":
+                userJSON.forEach(element => {
+                    if (element.uuid == input) {
+                        user = element;
+                        userIndex = userJSON.indexOf(element);
+                    }
+                });
+                break;
+            default:
+                userJSON.forEach(element => {
+                    if (element.token == input) {
+                        user = element;
+                        userIndex = userJSON.indexOf(element);
+                    }
+                });
+                break;
+        }
+        return user;
+    }).catch(err => {
+        console.log(err);
+    })
+}
+
+async function fetchSettings(reqBody) {
+    // Clone the request body to a new variable for persistance
+    var c_ReqBody = reqBody;
+    // Check for the token validity
+    const checkToken = await checkTokenCache(c_ReqBody.token);
+
+    if (checkToken) {
+        const uuid = await getUUID(c_ReqBody.token);
+        const userObject = await getUserFromDatabase(uuid, "uuid");
+
+        switch (c_ReqBody.method) {
+            case "get":
+                return userObject.settings;
+            case "store":
+                // Check if the settings object is valid
+                if (c_ReqBody.settings == undefined) {
+                    throw new Error("Settings object is undefined!");
+                }
+
+                if (!compareArrays(Object.keys(c_ReqBody.settings), Object.keys(userObject.settings))) {
+                    console.error("Settings returned an invalid object!:" + c_ReqBody.settings);
+                    throw new Error("Settings object is missing values! This is a critical error! Please delete your stored settings pair and try again!");
+                }
+
+                // Update the settings
+                userObject.settings = c_ReqBody.settings;
+
+                // Update the database
+                var database = await fsp.readFile(databaseDir, 'utf8');
+                var users = await JSON.parse(database); // Parse the database
+                
+                // Find user object in the database and update it
+                users.forEach(element => {
+                    if (element.uuid == uuid) {
+                        element.settings = userObject.settings;
+                    }
+                });
+
+                users = JSON.stringify(users, null, 4);
+                fs.writeFile(databaseDir, users, (err) => {
+                    if (err) console.error(err);
+                });
+                console.success(userObject.fullname + "'s settings have been updated!");
+                return userObject.settings;
+            default:
+                throw new Error("Invalid method!");
+        }
+    }
+}
+
 async function markTaskComplete(token, taskID) {
     var tokenNew = token;
     var taskIDNew = taskID;
@@ -177,6 +299,8 @@ async function markTaskComplete(token, taskID) {
             var taskFileJSON = JSON.parse(taskFile);
             var allTasks = taskFileJSON.all.lists;
             var completedList = [...(taskFileJSON.completed.tasks || [])];
+            var taskParent;
+            var wasPreviouslyCompleted;
 
             // Mark task as complete and move it to the completed list
             allTasks.forEach(list => {
@@ -194,7 +318,10 @@ async function markTaskComplete(token, taskID) {
                         var index = list.tasks.indexOf(task);
                         list.tasks.splice(index, 1);
 
-                        console.log("⚠ Task marked complete!");
+                        taskParent = task.origin;
+                        wasPreviouslyCompleted = false;
+
+                        console.success("Task " + task.id + " marked complete!");
                     }
                 });
             });
@@ -214,6 +341,8 @@ async function markTaskComplete(token, taskID) {
                                 list.tasks.push(task);
                             }
                         });
+                        taskParent = task.origin;
+                        wasPreviouslyCompleted = true;
                         // Remove task from completed list
                         var index = completedList.indexOf(task);
                         completedList.splice(index, 1);
@@ -235,36 +364,37 @@ async function markTaskComplete(token, taskID) {
             fs.writeFile(taskDir, taskFileJSON, (err) => {
                 if (err) console.error(err);
             });
-            return "Task marked complete!";
+            console.info(tokenNew + "'s user's taskfile has been updated");
+            return [taskParent, wasPreviouslyCompleted];
         }).catch(err => {
             console.log(err.errno);
-            if (err.errno == -4058) {
-                console.log("No tasklist found, creating one!");
-                if (fs.existsSync("F:/web-private/alfredo/lists/" + uuid) == false) {
-                    console.log("No user directory found, creating one!");
-                    fs.mkdir("F:/web-private/alfredo/lists/" + uuid, (err) => {
-                        if (err) console.error(err);
-                    });
-                }
-                var tasklistNew = {
-                    "all": {
-                        "properties": {
-                            "name": "All Tasks",
-                            "icon": "noodle",
-                            "color": "#000000",
-                            "tasks": {}
-                        },
-                        "lists": {}
-                    }
-                }
-                tasklistNew = JSON.stringify(tasklistNew, null, 4);
-                fs.writeFile(taskDir, tasklistNew, (err) => {
-                    if (err) console.error(err);
-                });
-                return markTaskComplete(token, taskID);
-            } else {
-                console.log(err);
-            }
+            // if (err.errno == -4058) {
+            //     console.log("No tasklist found, creating one!");
+            //     if (fs.existsSync("F:/web-private/alfredo/lists/" + uuid) == false) {
+            //         console.log("No user directory found, creating one!");
+            //         fs.mkdir("F:/web-private/alfredo/lists/" + uuid, (err) => {
+            //             if (err) console.error(err);
+            //         });
+            //     }
+            //     var tasklistNew = {
+            //         "all": {
+            //             "properties": {
+            //                 "name": "All Tasks",
+            //                 "icon": "noodle",
+            //                 "color": "#000000",
+            //                 "tasks": {}
+            //             },
+            //             "lists": {}
+            //         }
+            //     }
+            //     tasklistNew = JSON.stringify(tasklistNew, null, 4);
+            //     fs.writeFile(taskDir, tasklistNew, (err) => {
+            //         if (err) console.error(err);
+            //     });
+            //     return markTaskComplete(token, taskID);
+            // } else {
+            //     console.log(err);
+            // }
         })
     } else {
         throw new Error("Invalid token!");
@@ -287,6 +417,9 @@ async function credentialHandler(username, password) {
             if (users[i].token == undefined) {
                 users[i].token = identifierGen("token");
                 userToken = users[i].token;
+                userUUID = users[i].uuid;
+                userFullname = users[i].fullname;
+                userSettings = users[i].settings;
 
                 users = JSON.stringify(users, null, 4);
 
@@ -294,12 +427,13 @@ async function credentialHandler(username, password) {
 
                 });
 
-                return userToken;
-                break;
+                return [userToken, userUUID, userFullname, userSettings];
             } else {
                 userToken = users[i].token;
-                return userToken;
-                break;
+                userUUID = users[i].uuid;
+                userFullname = users[i].fullname;
+                userSettings = users[i].settings;
+                return [userToken, userUUID, userFullname, userSettings];
             }
             
         }
