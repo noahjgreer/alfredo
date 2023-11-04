@@ -87,17 +87,13 @@
         var currentSettings = JSON.parse(localStorage.getItem("settings"));
         console.log(currentSettings);
         Object.keys(currentSettings).forEach(setting => {
-            switch (setting) {
-                case "motivation":
-                    console.log('updated motivation');
-                    if (currentSettings[setting] == true) {
-                        document.querySelector("#motivation.value").classList.add("active");
+                let settingElementValue = document.getElementById(setting)
+                if (settingElementValue.classlist.contains("switch")) {
+                    if (setting == true) {
+                        settingElementValue.classlist.add("active");
                     } else {
-                        document.querySelector("#motivation.value").classList.remove("active");
+                        settingElementValue.classlist.remove("active");
                     }
-                    break;
-                default:
-                    break;
             }
         });
 
