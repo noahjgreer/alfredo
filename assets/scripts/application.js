@@ -13,7 +13,7 @@ let listableSections = ['tasks', 'routines', 'events'];
 
 // Fetch tasks from default section on page load
 async function init() {
-    let taskBody = await loadSection('settings');
+    let taskBody = await loadSection('tasks');
     // fetchFromCategory('tasks', undefined, taskBody, true);
 }
 
