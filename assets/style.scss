@@ -23,6 +23,7 @@ $list-span-color: #C6C6C8;
 $list-icon-color: #C5C5C7;
 $switch-color: #E9E9EA;
 $switch-color-active: #65C466;
+$switch-width: 3.2rem;
 $switch-transition: all 0.25s cubic-bezier(0, 0, 0.35, 1.25);
 $switch-knob-shadow: 0.5px 2.5px 7.5px -5px rgba(0,0,0,0.65);
 $list-icon-icon-color: invert(95%) sepia(4%) saturate(92%) hue-rotate(202deg) brightness(85%) contrast(88%);
@@ -331,7 +332,7 @@ div.line {
 .switch {
     margin: 0px;
     margin-block: -1.5rem;
-    width: 3.2rem;
+    width: $switch-width;
     height: 1.95rem;
     background-color: $switch-color;
     border-radius: $rounded-radius;
@@ -351,7 +352,7 @@ div.line {
     &.active {
         background-color: $switch-color-active;
         .knob {
-            transform: translateX(1.25rem);
+            transform: translateX(calc($switch-width - 1.7rem - (0.125rem * 2))); // 1.825rem is the width of the knob plus its margin
         }
     }
 }
