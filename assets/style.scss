@@ -644,6 +644,7 @@ p.subtle {
     color: $unselected-color;
     text-align: center;
     margin-block: 0.25rem;
+    margin-inline: $body-standard-margin;
 }
 
 .icon {

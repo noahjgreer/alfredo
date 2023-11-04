@@ -581,6 +581,7 @@ p.subtle {
   color: #999999;
   text-align: center;
   margin-block: 0.25rem;
+  margin-inline: 2.5rem 5%;
 }
 
 .icon {

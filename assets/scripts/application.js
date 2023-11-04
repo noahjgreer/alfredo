@@ -260,10 +260,10 @@ async function updateTasks(tasks, isLists, taskBody) {
         } else {
             // Set a motivational quote on the page instead
             tasklist.innerHTML = `
-            <p class="subtle">You're all caught up! <br><br> ${await getMotivation()}</p>
+            <p class="subtle">You're all caught up! <br><br> ${JSON.parse(localStorage.getItem('settings')).motivation ? await getMotivation() : ""}</p>
             `;
         }
-        console.log(tasklist);
+        // console.log(tasklist);
     }
 }
 

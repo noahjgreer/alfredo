@@ -76,11 +76,12 @@
         document.querySelector("#token.value").innerHTML = localStorage.getItem("token");
         document.querySelector("#uuid.value").innerHTML = localStorage.getItem("uuid");
 
+        /*
         document.querySelectorAll('.switch').forEach(element => {
-            element.addEventListener('click', () => {
-                element.classList.toggle('active');    
+            element.addEventListener('click', (event) => {
+                switchToggle(element, 'updateBool');  
             });
-        });
+        });*/
 
         // Update the settings to match the local storage
         var currentSettings = JSON.parse(localStorage.getItem("settings"));
@@ -88,7 +89,12 @@
         Object.keys(currentSettings).forEach(setting => {
             switch (setting) {
                 case "motivation":
-                    document.querySelector("#" + setting + ".switch").classList.toggle('active');
+                    console.log('updated motivation');
+                    if (currentSettings[setting] == true) {
+                        document.querySelector("#motivation.value").classList.add("active");
+                    } else {
+                        document.querySelector("#motivation.value").classList.remove("active");
+                    }
                     break;
                 default:
                     break;

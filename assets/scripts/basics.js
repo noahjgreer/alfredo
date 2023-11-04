@@ -437,6 +437,8 @@ function getNameFromTaskQuery(query, isList) {
 function switchToggle(element, event) {
     switch (event) {
         case 'updateBool':
+            element.classList.toggle('active');
+
             var elementStatus
             if (element.classList.contains('active')) {
                 elementStatus = true;
@@ -446,9 +448,69 @@ function switchToggle(element, event) {
             var currentSettings = JSON.parse(localStorage.getItem('settings'));
             currentSettings[element.getAttribute('id')] = elementStatus;
             localStorage.setItem('settings', JSON.stringify(currentSettings));
+            updateSettings('store');
     }
-    console.log(element);
-    console.log(event);
+    // console.log(element);
+    // console.log(event);
+}
+
+// Function which passes off the stored local settings to the server for storing, or fetched from the server to the client
+async function updateSettings(method) {
+    switch (method) {
+        case 'fetch':
+            await fetch(`https://${localStorage.getItem("fetchLoc")}:3001/`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': "application/json"
+                },
+                body: JSON.stringify({
+                    purpose: "fetchSettings",
+                    method: "get",
+                    token: localStorage.getItem('token')
+                })        
+            }).then(response => {
+                if (!response.ok) {
+                    console.error(response);
+                    callAlert('An Error Occurred: ' + response.status, "While processing your request to fetch your settings, the server sent back a bad response: " + response.statusText);
+                } else {
+                    return response.json();
+                }
+            }).then(data => {
+                localStorage.setItem('settings', JSON.stringify(data));
+                // console.log(data);
+            }).catch(error => {
+                console.error(error);
+            });
+            break;
+        case 'store':
+            await fetch(`https://${localStorage.getItem("fetchLoc")}:3001/`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': "application/json"
+                },
+                body: JSON.stringify({
+                    purpose: "fetchSettings",
+                    method: "store",
+                    token: localStorage.getItem('token'),
+                    settings: JSON.parse(localStorage.getItem('settings'))
+                })        
+            }).then(response => {
+                if (!response.ok) {
+                    console.error(response);
+                    callAlert('An Error Occurred: ' + response.status, "While processing your request to store your settings, the server sent back a bad response: " + response.statusText);
+                } else {
+                    return response.json();
+                }
+            }).then(data => {
+                // console.log(data);
+            }).catch(error => {
+                console.error(error);
+            });
+            break;
+        default:
+            console.error('Invalid method of: "' + method + '"');
+            break;
+    }
 }
 
 // intervalLoop();
