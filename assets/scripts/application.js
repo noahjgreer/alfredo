@@ -259,9 +259,16 @@ async function updateTasks(tasks, isLists, taskBody) {
             });    
         } else {
             // Set a motivational quote on the page instead
-            tasklist.innerHTML = `
-            <p class="subtle">You're all caught up! <br><br> ${JSON.parse(localStorage.getItem('settings')).motivation ? await getMotivation() : ""}</p>
-            `;
+            if (JSON.parse(localStorage.getItem('settings')).motivation) {
+                var bibleMotivation = await getMotivation();
+                tasklist.innerHTML = `
+                <p class="subtle">You're all caught up! <br><br> ${bibleMotivation}</p>
+                `;
+            } else {
+                tasklist.innerHTML = `
+                <p class="subtle">You're all caught up!</p>
+                `;
+            }
         }
         // console.log(tasklist);
     }
@@ -395,7 +402,7 @@ async function markTaskComplete(taskID) {
 }
 
 async function getMotivation() {
-    let response = await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+    return await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -403,10 +410,28 @@ async function getMotivation() {
         body: JSON.stringify({
             purpose: "getMotivation"
         })
+    }).then(response => {
+        if (!response.ok) {
+            console.log(response);
+            callAlert('An Error Occurred: ' + response.status, "While fetching your tasks, the server sent back a bad response: " + response.statusText);
+        }
+        console.log(response);
+        return response.json();
+    }).then(data => {
+        console.log(data.response);
+        return data.response;
     });
-    let data = await response.json();
-    return data.response;
-}
+}    // let response = await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify({
+    //         purpose: "getMotivation"
+    //     })
+    // });
+    // let data = await response.json();
+    // return data.response;
 
 // if (window.addEventListener) {
 //     addEventListener('DOMContentLoaded', headerVisibilityHandler, false);

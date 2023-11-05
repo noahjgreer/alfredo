@@ -17,7 +17,7 @@
             <h3>User Settings</h3>
             <ul>
                 <li>
-                    <p class="label" id="motivation">Motivation</p>
+                    <p class="label" id="motivation">Biblical Motivation</p>
                     <a class="value switch" id="motivation" onclick="switchToggle(this, 'updateBool')">
                         <div class="knob"></div>
                     </a>
@@ -87,15 +87,26 @@
         var currentSettings = JSON.parse(localStorage.getItem("settings"));
         console.log(currentSettings);
         Object.keys(currentSettings).forEach(setting => {
-                let settingElementValue = document.getElementById(setting)
-                if (settingElementValue.classlist.contains("switch")) {
-                    if (setting == true) {
-                        settingElementValue.classlist.add("active");
+                let settingElementValue = document.querySelector(`.value`);
+                // Check if the setting is a bool
+                if (typeof currentSettings[setting] === 'boolean') {
+                    // Check if the setting is true
+                    if (currentSettings[setting]) {
+                        // Set the switch to on
+                        document.querySelector(`#${setting}.value`).classList.add('active');
                     } else {
-                        settingElementValue.classlist.remove("active");
+                        // Set the switch to off
+                        document.querySelector(`#${setting}.value`).classList.remove('active');
                     }
+                } else {
+                    // Set the value to the setting
+                    document.querySelector(`#${setting}.value`).innerHTML = currentSettings[setting];
+                }
+                console.log(settingElementValue);
+                console.log(setting);
+                console.log(typeof currentSettings[setting]);
             }
-        });
+        );
 
         // Get latest commit from Github API using fetch(), repo: noahjgreer/alfredo
         fetch('https://api.github.com/repos/noahjgreer/alfredo/commits')
