@@ -21,7 +21,7 @@ app.use(express.json());
 //app.use(bodyParser.urlencoded({extended: false}));
 
 app.get('/', (req, res) => {
-    console.log("request recieved" + new Date().toISOString());
+    console.log("Recieved a Get Request. This is unusual! " + req.ip + " " + req.get('User-Agent') + " " + new Date().toISOString());
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, token');
@@ -35,12 +35,10 @@ app.get('/', (req, res) => {
 app.post('/', async (req, res) => {
     try {
         // Make a fancy Console.Table that will log the request, the purpose, the date, and the information about the client who called the request.
-        if (req.body.token) {
-            console.table([
-                ["Request", "Purpose", "Date", "IP Address", "Token", "User Agent"],
-                [req.method, req.body.purpose, new Date().toISOString(), req.ip, req.body.token, req.get('User-Agent')]
-            ]);
-        }
+        console.table([
+            ["Request", "Purpose", "Date", "IP Address", "Token", "User Agent"],
+            [req.method || "undefined", req.body.purpose || "undefined", new Date().toISOString(), req.ip || "undefined", req.body.token || "undefined", req.get('User-Agent') || "undefined"]
+        ]);
         switch (req.body.purpose) {
             case "login":
                 await credentialHandler(req.body.name, req.body.pass).then(data => {
@@ -106,6 +104,7 @@ app.post('/', async (req, res) => {
                         response: err.message,
                     });
                 });
+                break;
             case "fetchSettings":
                 await fetchSettings(req.body).then(data => {
                     return res.status(200).json({
@@ -456,7 +455,7 @@ async function checkTokenCache(token) {
             break;
         }
         if (i == users.length - 1) {
-            console.log("No token found!");
+            console.trace("No token found!");
             return false;
             break;
         }
