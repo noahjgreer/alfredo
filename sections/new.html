@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="theme-color" content="#F2F2F6">
+    </head>
+    <body style="background-color: #F2F2F6;">
+        <div class="section-header">
+            <div class="content">
+                <h1>New</h1>
+                <!-- <a class="profile">
+                    <img src="/assets/icons/user-default.svg" alt="Your Profile">
+                </a> -->
+            </div>
+            <!-- <div class="line"></div> -->
+        </div>
+        <div class="seg-control focus">
+            <a class="seg-control-item" onclick="updateSegmentedControl('updateActive', this)">
+                Task
+            </a>
+            <a class="seg-control-item" onclick="updateSegmentedControl('updateActive', this)">
+                List
+            </a>
+            <a class="seg-control-item" onclick="updateSegmentedControl('updateActive', this)">
+                Integration
+            </a>
+        </div>
+        <div class="grouped list">
+            <h3>Task Information</h3>
+            <ul>
+                <li class="dropdown">
+                    <p class="label" id="type">
+                        Task Type
+                    </p>
+                    <p class="value" id="type">
+                        Task
+                        <img src="/assets/icons/arrow-double.svg" alt="" class="icon">
+                    </p>
+                    <select name="type" id="type">
+                        <option value="Task">Task</option>
+                        <option value="Routine">Routine</option>
+                        <option value="Event">Event</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+        <div class="grouped list">
+            <ul>
+                <li>
+                    <input class="value" id="name" placeholder="Title"></input>
+                </li>
+                <li>
+                    <p class="label" id="token">Token</p>
+                    <p class="value code" id="token">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+                <li>
+                    <p class="label" id="uuid">UUID</p>
+                    <p class="value code" id="uuid">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+            </ul>
+        </div>
+        <div class="grouped list">
+            <h3>Application Data</h3>
+            <ul>
+                <li>
+                    <p class="label" id="version">Version</p>
+                    <p class="value" id="version">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+                <li>
+                    <p class="label" id="build">Build</p>
+                    <p class="value" id="build">
+                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    </p>
+                </li>
+            </ul>
+    </body>
+    <script>
+        updateSegmentedControl('init');
+
+        // Listen to Dropdown value update, and then set the innerText value to be the selected option
+        document.querySelectorAll('select').forEach(item => {
+            item.addEventListener('change', event => {
+                item.parentElement.querySelector('.value').innerHTML = item.value + `
+                <img src="/assets/icons/arrow-double.svg" alt="" class="icon">
+                `;
+            })
+        })
+    </script>
+</html>

@@ -21,11 +21,13 @@ $modal-text-color: #85858A;
 $input-span-color: #BCBCC1;
 $list-span-color: #C6C6C8;
 $list-icon-color: #C5C5C7;
-$switch-color: #E9E9EA;
-$switch-color-active: #65C466;
+$switch-color-inactive-LM: rgba(120, 120, 128, 0.16);
+$switch-color-inactive-DM: rgba(120, 120, 128, 0.32);
+$switch-color-active-LM: #34C759;
+$switch-color-active-DM: #30D158;
 $switch-width: 3.2rem;
 $switch-transition: all 0.25s cubic-bezier(0, 0, 0.35, 1.25);
-$switch-knob-shadow: 0.5px 2.5px 7.5px -5px rgba(0,0,0,0.65);
+$switch-knob-shadow: 0px 3px 1px 0px rgba(0, 0, 0, 0.06), 0px 3px 8px 0px rgba(0, 0, 0, 0.15), 0px 0px 0px 1px rgba(0, 0, 0, 0.04);
 $list-icon-icon-color: invert(95%) sepia(4%) saturate(92%) hue-rotate(202deg) brightness(85%) contrast(88%);
 $hyperlink-color: #3478F6;
 $hyperlink-icon-color: invert(31%) sepia(98%) saturate(1634%) hue-rotate(210deg) brightness(104%) contrast(93%);
@@ -288,8 +290,8 @@ footer {
     z-index: 99;
     position: fixed;
     width: 100%;
-    opacity: 100%;
-    bottom: 14.95rem;
+    opacity: 50%;
+    bottom: 7.5rem;
     left: 0px;
     // mix-blend-mode: difference;
 }
@@ -329,8 +331,18 @@ div.line {
     border-bottom: $unselected-color solid 0.5px;
 }
 
+div.seg-control-spacer {
+    width: 0.0625rem;
+    height: 0.75rem;
+    flex-shrink: 0;
+
+    border-radius: 0.03125rem;
+    opacity: 0.3;
+    background: #8E8E93;
+}
+
 .switch {
-    margin: 0px;
+    /*margin: 0px;
     margin-block: -1.5rem;
     width: $switch-width;
     height: 1.95rem;
@@ -338,22 +350,104 @@ div.line {
     border-radius: $rounded-radius;
     display: flex;
     align-items: center;
+    */
     transition: $switch-transition;
+    margin: 0px;
+
+    display: flex;
+    // width: (3.1875rem - (1.375rem - 0.125rem));
+    height: calc(1.9375rem - (0.125rem * 2));
+    padding: 0.125rem 1.375rem 0.125rem 0.125rem;
+    align-items: center;
+    flex-shrink: 0;
+
+    border-radius: 6.25rem;
+    background: $switch-color-inactive-LM;
     .knob {
-        width: 1.7rem;
-        height: 1.7rem;
-        aspect-ratio: 1/1;
-        background-color: white;
-        border-radius: $rounded-radius;
-        margin: 0.125rem;
+        width: 1.6875rem;
+        height: 1.6875rem;
+        flex-shrink: 0;
+
+        // aspect-ratio: 1/1;
+        // margin: 0.125rem;
         transition: $switch-transition;
+
+        border-radius: 6.25rem;
+        background: #FFF;
         box-shadow: $switch-knob-shadow;
     }
     &.active {
-        background-color: $switch-color-active;
-        .knob {
-            transform: translateX(calc($switch-width - 1.7rem - (0.125rem * 2))); // 1.825rem is the width of the knob plus its margin
+        background-color: $switch-color-active-LM;
+        padding: 0.125rem 0.125rem 0.125rem 1.375rem;
+    }
+}
+
+.seg-control {
+    display: flex;
+    flex-direction: row;
+    padding: 0.125rem;
+    justify-content: center;
+    align-items: center;
+    margin-block: $hyperlink-margin-block;
+
+    border-radius: 0.5625rem;
+    background: var(--fills-tertiary, rgba(118, 118, 128, 0.12));
+    &.focus {
+        .seg-control-item {
+            padding-block: 0.325rem;
         }
+    }
+    .seg-control-select {
+        // Remove Defaults
+        padding: 0px;
+        margin: 0px;
+
+        height: 2rem;
+
+        position: absolute;
+        border-radius: 0.4375rem;
+        border: 0.5px solid rgba(0, 0, 0, 0.04);
+        background: #FFF;
+        box-shadow: 0px 3px 1px 0px rgba(0, 0, 0, 0.04), 0px 3px 8px 0px rgba(0, 0, 0, 0.12);
+        font-weight: 590;
+    }
+    .seg-control-item {
+        transition: $switch-transition;
+
+        // Remove Defaults
+        padding: 0px;
+        margin: 0px;
+
+        // Display
+        display: flex;
+        padding: 0.1875rem 0.625rem;
+        align-items: center;
+        flex: 1 0 0;
+        align-self: stretch;
+        width: 100%;
+        height: 1.125rem;
+        border: 0.5px solid #00000000;
+
+        // Typography
+        justify-content: center;
+        justify-self: center;
+        margin: 0px;
+        overflow: hidden;
+        color: var(--labels-primary, #000);
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.8125rem;
+        font-weight: 400;
+        font-style: normal;
+        line-height: 1.125rem; /* 138.462% */
+    }
+    .active {
+        border-radius: 0.4375rem;
+        border: 0.5px solid rgba(0, 0, 0, 0.04);
+        background: #FFF;
+        box-shadow: 0px 3px 1px 0px rgba(0, 0, 0, 0.04), 0px 3px 8px 0px rgba(0, 0, 0, 0.12);
+        font-weight: 590;
     }
 }
 
@@ -580,6 +674,64 @@ div.alertContainer {
     }
     h3 {
         margin-block: 0rem;
+    }
+    input {
+        background-color: transparent;
+        border: none;
+        // padding: 0.75rem 2.5%;
+        padding: 0px;
+        font-size: $text-field-font-size;
+        font-family: $font;
+        letter-spacing: 0.25px;
+        width: 100%;
+        -webkit-tap-highlight-color: transparent;
+        text-align: left;
+        color: black !important;
+    }
+    position: relative;
+    select {
+        appearance: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        border: none;
+        color: transparent;
+        option {
+            color: black;
+        }
+    }
+    .dropdown {
+        p {
+            display: flex;
+            .icon {
+                width: 0.85rem;
+                padding: 0px;
+                padding-left: 0.25rem;
+                filter: $unselected-icon-color;
+            }
+        }
+    }
+    &.grouped {
+        ul {
+            background-color: transparent;
+            border: none;
+        }
+        li:first-child {
+            border-top-left-radius: 0.625rem;
+            border-top-right-radius: 0.625rem;
+        }
+        li:last-child {
+            border-bottom-left-radius: 0.625rem;
+            border-bottom-right-radius: 0.625rem;
+        }
+        li {
+            margin-inline: 1rem;
+            padding-inline: 1rem;
+            background-color: white;
+        }
     }
 }
 

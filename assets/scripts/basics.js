@@ -24,6 +24,63 @@ function updateURLParamsObject() {
     }
 }
 
+function updateSegmentedControl(call, element) {
+    switch (call) {
+        case 'init':
+            // Set Default Active
+            document.querySelectorAll('.seg-control').forEach(element => {
+                element.querySelector('.seg-control-item:not(.seg-control-spacer)').classList.add('active');
+            });
+
+            // Segment Control Spacers
+            document.querySelectorAll('.seg-control').forEach(element => {
+                // Remove all previous spacers
+                element.querySelectorAll('.seg-control-spacer').forEach(element => {
+                    element.remove();
+                });
+
+                // Add spacers to the segmented control, but not around the active element, or the last element
+                element.querySelectorAll('.seg-control-item').forEach(element => {
+                    if (!element.classList.contains('active') && !element.isSameNode(element.parentElement.lastElementChild)) {
+                        if (!element.nextElementSibling.classList.contains('active')) {
+                            element.insertAdjacentHTML('afterend', '<div class="seg-control-spacer"></div>');
+                        }
+                    }
+                });
+            });
+            break;
+        case 'updateActive':
+            // Remove all previous active elements
+            element.parentElement.querySelectorAll('.seg-control-item').forEach(element => {
+                element.classList.remove('active');
+            });
+            // Set new active element
+            element.classList.add('active');
+
+            updateSegmentedControl('spacers');
+            break;
+        case 'spacers':
+            // Segment Control Spacers
+            document.querySelectorAll('.seg-control').forEach(element => {
+                // Remove all previous spacers
+                element.querySelectorAll('.seg-control-spacer').forEach(element => {
+                    element.remove();
+                });
+
+                // Add spacers to the segmented control, but not around the active element, or the last element
+                element.querySelectorAll('.seg-control-item').forEach(element => {
+                    if (!element.classList.contains('active') && !element.isSameNode(element.parentElement.lastElementChild)) {
+                        if (!element.nextElementSibling.classList.contains('active')) {
+                            element.insertAdjacentHTML('afterend', '<div class="seg-control-spacer"></div>');
+                        }
+                    }
+                });
+            });
+            break;
+    }    
+}
+
+
 function updateURLParams(method, object) {
     var newURLparams = '?';
     // Check if the inputted object has a ? at the start, and remove it if it does
