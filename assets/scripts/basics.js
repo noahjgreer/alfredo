@@ -1,6 +1,7 @@
 // Generic References
 var hammerDocument = Hammer(document);
 var debugMode = true;
+var previousThemeColor = document.querySelector('meta[name="theme-color"]').getAttribute('content');
 
 // Get document height
 const documentHeight = function () {
@@ -311,6 +312,15 @@ function callAlert(messageTitle, messageBody, specialAction) {
             return '';
         }
     }
+    // Set the document theme color to match the overlay
+    var overlayColor = 'rgba(0, 0, 0, 0.425)';
+    var baseThemeColor = document.querySelector('meta[name="theme-color"]').getAttribute('content');
+    var newThemeColor = blend_colors(baseThemeColor, rgbToHex(rgbaToRgb(overlayColor)), 0.5);
+
+    previousThemeColor = baseThemeColor;
+
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', newThemeColor);
+
     alertElement.setAttribute('class', 'alertContainer');
     alertElement.setAttribute('id', generateID(6));
     var alertID = alertElement.getAttribute('id');
@@ -336,9 +346,131 @@ function callAlert(messageTitle, messageBody, specialAction) {
     return alertElement.getAttribute('id');
 }
 
+/*
+    Courtesy of https://coderwall.com/p/z8uxzw/javascript-color-blender
+    blend two colors to create the color that is at the percentage away from the first color
+    this is a 5 step process
+        1: validate input
+        2: convert input to 6 char hex
+        3: convert hex to rgb
+        4: take the percentage to create a ratio between the two colors
+        5: convert blend to hex
+    @param: color1      => the first color, hex (ie: #000000)
+    @param: color2      => the second color, hex (ie: #ffffff)
+    @param: percentage  => the distance from the first color, as a decimal between 0 and 1 (ie: 0.5)
+    @returns: string    => the third color, hex, represenatation of the blend between color1 and color2 at the given percentage
+*/
+function blend_colors(color1, color2, percentage)
+{
+    /*
+    convert a Number to a two character hex string
+    must round, or we will end up with more digits than expected (2)
+    note: can also result in single digit, which will need to be padded with a 0 to the left
+    @param: num         => the number to conver to hex
+    @returns: string    => the hex representation of the provided number
+    */
+    function int_to_hex(num)
+    {
+        var hex = Math.round(num).toString(16);
+        if (hex.length == 1)
+            hex = '0' + hex;
+        return hex;
+    }
+
+    // check input
+    color1 = color1 || '#000000';
+    color2 = color2 || '#ffffff';
+    percentage = percentage || 0.5;
+
+    // 1: validate input, make sure we have provided a valid hex
+    if (color1.length != 4 && color1.length != 7)
+        throw new Error('colors must be provided as hexes');
+
+    if (color2.length != 4 && color2.length != 7)
+        throw new Error('colors must be provided as hexes');    
+
+    if (percentage > 1 || percentage < 0)
+        throw new Error('percentage must be between 0 and 1');
+
+
+    // 2: check to see if we need to convert 3 char hex to 6 char hex, else slice off hash
+    //      the three character hex is just a representation of the 6 hex where each character is repeated
+    //      ie: #060 => #006600 (green)
+    if (color1.length == 4)
+        color1 = color1[1] + color1[1] + color1[2] + color1[2] + color1[3] + color1[3];
+    else
+        color1 = color1.substring(1);
+    if (color2.length == 4)
+        color2 = color2[1] + color2[1] + color2[2] + color2[2] + color2[3] + color2[3];
+    else
+        color2 = color2.substring(1);   
+
+    // console.log('valid: c1 => ' + color1 + ', c2 => ' + color2);
+
+    // 3: we have valid input, convert colors to rgb
+    color1 = [parseInt(color1[0] + color1[1], 16), parseInt(color1[2] + color1[3], 16), parseInt(color1[4] + color1[5], 16)];
+    color2 = [parseInt(color2[0] + color2[1], 16), parseInt(color2[2] + color2[3], 16), parseInt(color2[4] + color2[5], 16)];
+
+    // console.log('hex -> rgba: c1 => [' + color1.join(', ') + '], c2 => [' + color2.join(', ') + ']');
+
+    // 4: blend
+    var color3 = [ 
+        (1 - percentage) * color1[0] + percentage * color2[0], 
+        (1 - percentage) * color1[1] + percentage * color2[1], 
+        (1 - percentage) * color1[2] + percentage * color2[2]
+    ];
+
+    // console.log('c3 => [' + color3.join(', ') + ']');
+
+    // 5: convert to hex
+    color3 = '#' + int_to_hex(color3[0]) + int_to_hex(color3[1]) + int_to_hex(color3[2]);
+
+    // console.log(color3);
+
+    // return hex
+    return color3;
+}
+
+function rgbToHex(rgb) {
+    // Choose correct separator
+    let sep = rgb.indexOf(",") > -1 ? "," : " ";
+    // Turn "rgb(r, g, b)" into [r, g, b]
+    rgb = rgb.substr(4).split(")")[0].split(sep);
+
+    let r = (+rgb[0]).toString(16),
+        g = (+rgb[1]).toString(16),
+        b = (+rgb[2]).toString(16);
+
+    if (r.length == 1)
+        r = "0" + r;
+    if (g.length == 1)
+        g = "0" + g;
+    if (b.length == 1)
+        b = "0" + b;
+
+    return "#" + r + g + b;
+}
+
+function rgbaToRgb(rgba) {
+    // Remove "rgba(", ")" and spaces, then split into an array
+    let parts = rgba.substring(rgba.indexOf("(") + 1, rgba.lastIndexOf(")")).split(/,\s*/),
+    r = parseInt(parts[0]),
+    g = parseInt(parts[1]),
+    b = parseInt(parts[2]),
+    a = parts[3] ? parseFloat(parts[3]) : 1;
+
+    // Assuming a white background, calculate the new RGB values
+    let rNew = Math.round((1 - a) * 255 + a * r);
+    let gNew = Math.round((1 - a) * 255 + a * g);
+    let bNew = Math.round((1 - a) * 255 + a * b);
+
+    return `rgb(${rNew}, ${gNew}, ${bNew})`;
+}
+
 function dismissAlert(caller) {
     document.getElementById(caller).querySelector(`.alertButton`).classList.add('tapped');
     document.getElementById(caller).classList.add('dismissed');
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', previousThemeColor);
 
     document.getElementById(caller).addEventListener('animationend', (event) => {
         if (event.animationName == 'alertOut') {
@@ -375,6 +507,8 @@ function intervalLoop() {
 
 // Load Pages
 async function loadPage(page, args, isCache) {
+    console.log(args);
+
     // Check for Arguments
     if (!args) args = "";
     let pageID = 0;

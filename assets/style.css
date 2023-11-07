@@ -3,6 +3,9 @@
      -moz-user-select: none;
           user-select: none;
 }
+*[color-filter=white] {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
 
 html {
   min-height: 100%;
@@ -168,6 +171,10 @@ section {
   margin: 0px;
   padding-block: 0.75rem;
 }
+.tasklist .list > div {
+  display: flex;
+  flex-direction: row;
+}
 
 header {
   background-color: rgba(255, 255, 255, 0.9333333333);
@@ -203,7 +210,7 @@ footer {
   background-color: rgba(255, 255, 255, 0.9333333333);
   -webkit-backdrop-filter: blur(10px);
           backdrop-filter: blur(10px);
-  z-index: 100;
+  z-index: 98;
 }
 footer .footer-icon {
   width: 1.5rem;
@@ -395,9 +402,13 @@ div.seg-control-spacer {
 }
 
 .icon-inline {
+  padding-inline: 0.25rem;
   height: 0.75rem;
   justify-self: center;
   align-self: center;
+}
+.icon-inline.semi-big {
+  height: 1rem;
 }
 
 .list-arrow {
@@ -424,6 +435,7 @@ p:has(> .icon-inline) {
   align-items: center;
   justify-content: center;
   min-height: 3.55rem;
+  transition: all 0.2s ease-out;
 }
 .attention-button p {
   margin: 0px !important;
@@ -431,6 +443,10 @@ p:has(> .icon-inline) {
 .attention-button .loading-wheel {
   filter: brightness(2);
   width: 1.25rem;
+}
+.attention-button.inline {
+  position: relative;
+  width: 100%;
 }
 
 .attention-button.processing {
@@ -444,6 +460,7 @@ p:has(> .icon-inline) {
 
 div.alertContainer {
   background-color: rgba(0, 0, 0, 0.2);
+  z-index: 99;
   position: fixed;
   display: flex;
   height: 100%;
@@ -548,7 +565,6 @@ div.alertContainer #alert #alertOptions :first-child {
   width: 111.25%;
   max-width: 111.25%;
   margin-block: 0.85rem;
-  position: relative;
 }
 .list ul {
   display: flex;
@@ -576,6 +592,7 @@ div.alertContainer #alert #alertOptions :first-child {
   border-bottom: 0.5px solid #C6C6C8;
   flex-wrap: wrap;
   font-variation-settings: "opsz" 18.5;
+  position: relative;
 }
 .list ul li .value {
   color: #999999;
@@ -643,7 +660,7 @@ div.alertContainer #alert #alertOptions :first-child {
   border-bottom-right-radius: 0.625rem;
 }
 .list.grouped li {
-  margin-inline: 1rem;
+  margin-inline: 5%;
   padding-inline: 1rem;
   background-color: white;
 }

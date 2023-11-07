@@ -27,6 +27,7 @@ $switch-color-active-LM: #34C759;
 $switch-color-active-DM: #30D158;
 $switch-width: 3.2rem;
 $switch-transition: all 0.25s cubic-bezier(0, 0, 0.35, 1.25);
+$smooth-transition: all 0.2s ease-out;
 $switch-knob-shadow: 0px 3px 1px 0px rgba(0, 0, 0, 0.06), 0px 3px 8px 0px rgba(0, 0, 0, 0.15), 0px 0px 0px 1px rgba(0, 0, 0, 0.04);
 $list-icon-icon-color: invert(95%) sepia(4%) saturate(92%) hue-rotate(202deg) brightness(85%) contrast(88%);
 $hyperlink-color: #3478F6;
@@ -51,6 +52,9 @@ $gapmultiplier: 1.95;
 // Styling
 * {
     user-select: none;
+    &[color-filter=white] {
+        filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+    }
 }
 
 html {
@@ -216,6 +220,11 @@ section {
         }
     }
     .list {
+        > div {
+            display: flex;
+            flex-direction: row;
+        }
+        
         width: unset;
         border-radius: 0px;
         border: none;
@@ -258,7 +267,7 @@ footer {
     justify-content: space-around;
     background-color: #ffffffee;
     backdrop-filter: $backdrop-blur;
-    z-index: 100;
+    z-index: 98;
     .footer-icon {
         width: 1.5rem;
         height: 1.5rem;
@@ -475,9 +484,13 @@ div.seg-control-spacer {
 }
 
 .icon-inline {
+    padding-inline: 0.25rem;
     height: 0.75rem;
     justify-self: center;
     align-self: center;
+    &.semi-big {
+        height: 1rem;
+    }
 }
 
 .list-arrow {
@@ -504,12 +517,17 @@ p:has(> .icon-inline) {
     align-items: center;
     justify-content: center;
     min-height: calc($paragraph-font-size + ($body-standard-margin-block));
+    transition: $smooth-transition;
     p {
         margin: 0px !important;
     }
     .loading-wheel {
         filter: brightness(2);
         width: 1.25rem;
+    }
+    &.inline {
+        position: relative;
+        width: 100%;
     }
 }
 
@@ -523,7 +541,8 @@ p:has(> .icon-inline) {
 }
 
 div.alertContainer {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color:  rgba(0, 0, 0, 0.2);
+    z-index: 99;
     position: fixed;
     display: flex;
     height: 100%;
@@ -656,6 +675,7 @@ div.alertContainer {
             border-bottom: 0.5px solid $list-span-color;
             flex-wrap: wrap;
             font-variation-settings: "opsz" 18.5;
+            position: relative;
             .value {
                 color: $unselected-color;
                 word-break: break-all;
@@ -688,7 +708,6 @@ div.alertContainer {
         text-align: left;
         color: black !important;
     }
-    position: relative;
     select {
         appearance: none;
         position: absolute;
@@ -728,7 +747,7 @@ div.alertContainer {
             border-bottom-right-radius: 0.625rem;
         }
         li {
-            margin-inline: 1rem;
+            margin-inline: $body-standard-margin-inline;
             padding-inline: 1rem;
             background-color: white;
         }

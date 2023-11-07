@@ -36,9 +36,9 @@
                         <img src="/assets/icons/arrow-double.svg" alt="" class="icon">
                     </p>
                     <select name="type" id="type">
-                        <option value="Task">Task</option>
-                        <option value="Routine">Routine</option>
-                        <option value="Event">Event</option>
+                        <option value="task" selected>Task</option>
+                        <option value="routine">Routine</option>
+                        <option value="event">Event</option>
                     </select>
                 </li>
             </ul>
@@ -48,36 +48,30 @@
                 <li>
                     <input class="value" id="name" placeholder="Title"></input>
                 </li>
-                <li>
-                    <p class="label" id="token">Token</p>
-                    <p class="value code" id="token">
-                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                <li class="dropdown">
+                    <p class="label" id="list">
+                        List
                     </p>
-                </li>
-                <li>
-                    <p class="label" id="uuid">UUID</p>
-                    <p class="value code" id="uuid">
-                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
+                    <p class="value" id="list">
+                        <img src="/assets/icons/wheel2.svg" alt="Loading Lists..." class="loading-wheel">
                     </p>
+                    <select name="list" id="list">
+                        <option value="Task">Task</option>
+                        <option value="Routine">Routine</option>
+                        <option value="Event">Event</option>
+                    </select>
                 </li>
             </ul>
         </div>
-        <div class="grouped list">
-            <h3>Application Data</h3>
-            <ul>
-                <li>
-                    <p class="label" id="version">Version</p>
-                    <p class="value" id="version">
-                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
-                    </p>
-                </li>
-                <li>
-                    <p class="label" id="build">Build</p>
-                    <p class="value" id="build">
-                        <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel">
-                    </p>
-                </li>
-            </ul>
+        <button type="button" onclick="createNew({
+            'name': document.querySelector('#name.value').value,
+            'type': document.querySelector('select#type').value,
+            'list': document.querySelector('select#list').value
+        }, {
+            'caller': this
+        })" class="attention-button inline" id="new-task-button">
+            <p>Create New Task</p>
+        </button>
     </body>
     <script>
         updateSegmentedControl('init');
@@ -85,10 +79,37 @@
         // Listen to Dropdown value update, and then set the innerText value to be the selected option
         document.querySelectorAll('select').forEach(item => {
             item.addEventListener('change', event => {
-                item.parentElement.querySelector('.value').innerHTML = item.value + `
+                console.log(event);
+                item.parentElement.querySelector('.value').innerHTML = document.querySelector(`option[value=${event.target.value}]`).innerText + `
                 <img src="/assets/icons/arrow-double.svg" alt="" class="icon">
                 `;
             })
         })
+
+        // Get the lists from the server
+        async function setTaskListsDropdown() {
+            var taskLists = await fetchFromCategory('tasks', undefined, undefined, true, true);
+            var listDropdowns = document.querySelector('select#list');
+            console.log(listDropdowns);
+            console.log(taskLists);
+            listDropdowns.innerHTML = '';
+            taskLists.forEach(list => {
+                var option = document.createElement('option');
+                if (list.id != 'all' && list.id != 'completed') {
+                    option.value = list.id;
+                    option.innerText = list.name;
+                    listDropdowns.appendChild(option);
+                }
+            });
+            listDropdowns.firstChild.selected = true;
+
+            // Update the dropdown value
+            listDropdowns.parentElement.querySelector('.value').innerHTML = `
+            ${listDropdowns.firstChild.innerText}
+            <img src="/assets/icons/arrow-double.svg" alt="" class="icon">
+            `;
+        }
+        
+        setTaskListsDropdown();
     </script>
 </html>
