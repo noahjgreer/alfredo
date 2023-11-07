@@ -6,6 +6,9 @@
 *[color-filter=white] {
   filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
+*[color-filter=unselected] {
+  filter: #C5C5C7;
+}
 
 html {
   min-height: 100%;
@@ -642,7 +645,7 @@ div.alertContainer #alert #alertOptions :first-child {
   display: flex;
 }
 .list .dropdown p .icon {
-  width: 0.85rem;
+  width: 0.625rem;
   padding: 0px;
   padding-left: 0.25rem;
   filter: invert(71%) sepia(0%) saturate(2028%) hue-rotate(183deg) brightness(85%) contrast(92%);

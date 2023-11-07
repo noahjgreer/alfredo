@@ -55,6 +55,9 @@ $gapmultiplier: 1.95;
     &[color-filter=white] {
         filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
     }
+    &[color-filter=unselected] {
+        filter: $list-icon-color
+    }
 }
 
 html {
@@ -726,7 +729,7 @@ div.alertContainer {
         p {
             display: flex;
             .icon {
-                width: 0.85rem;
+                width: 0.625rem;
                 padding: 0px;
                 padding-left: 0.25rem;
                 filter: $unselected-icon-color;
