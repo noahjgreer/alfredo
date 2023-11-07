@@ -116,6 +116,19 @@ app.post('/', async (req, res) => {
                         response: err.message,
                     });
                 });
+                break;
+            case "createNew":
+                await createNew(req.body).then(data => {
+                    return res.status(200).json({
+                        response: data,
+                    });
+                }).catch(err => {
+                    console.error(err);
+                    return res.status(401).json({
+                        response: err.message,
+                    });
+                });
+                break;
             default:
                 return res.status(400);
         }
@@ -181,6 +194,78 @@ async function getMotivation() {
     }).catch(err => {
         console.log(err);
     })
+}
+
+async function createNew(body) {
+    var object = body.object;
+    var uuid;
+
+    // Validate Token
+    var token = body.token;
+    var checkToken = await checkTokenCache(token);
+    if (!checkToken) {
+        throw new Error("Invalid token!");
+    }
+
+    // Get the user's UUID
+    uuid = await getUUID(token);
+    
+    // Validate Object
+    if (object == undefined) {
+        throw new Error("Object is undefined!");
+    } else if (!object.type) {
+        throw new Error("Object type is undefined!");
+    } else if (!object.name) {
+        throw new Error("Object name is undefined!");
+    } else if (!object.list) {
+        throw new Error("Object list is undefined!");
+    }
+
+
+    switch (object.type) {
+        case "task": 
+            console.info("Creating a new task!");
+
+            // Create a new task
+            var task = {
+                "completed": false,
+                "completedDate": null,
+                "createdDate": Date.now(),
+                "description": object.description || "",
+                "id": identifierGen("task"),
+                "name": object.name,
+                "origin": object.list,
+            }
+            
+            // Grab the user's task file
+            var taskDir = "F:/web-private/alfredo/lists/" + uuid + "/tasks.json";
+            return fsp.readFile(taskDir, 'utf8').then((taskFile) => {
+                var taskFileJSON = JSON.parse(taskFile);
+                var allTasks = taskFileJSON.all.lists;
+                var taskParent;
+
+                // Add the task to the correct list
+                allTasks.forEach(list => {
+                    if (list.properties.id == object.list) {
+                        list.tasks.push(task);
+                        taskParent = list.properties.id;
+                    }
+                });
+
+                // Update the taskFileJSON
+                taskFileJSON.all.lists = allTasks;
+
+                // Write the changes to the file
+                taskFileJSON = JSON.stringify(taskFileJSON, null, 4);
+                fs.writeFile(taskDir, taskFileJSON, (err) => {
+                    if (err) console.error(err);
+                });
+                console.info("Task created!");
+                return taskParent;
+            }).catch(err => {
+                throw new Error(err);
+            })
+    }
 }
 
 /**
