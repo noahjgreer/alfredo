@@ -122,7 +122,8 @@ app.post('/', async (req, res) => {
             case "createNew":
                 await createNew(req.body).then(data => {
                     return res.status(200).json({
-                        response: data,
+                        response: data[0],
+                        cacheKey: data[1],
                     });
                 }).catch(err => {
                     console.error(err);
@@ -257,13 +258,17 @@ async function createNew(body) {
                 // Update the taskFileJSON
                 taskFileJSON.all.lists = allTasks;
 
+                // Update the user's cacheKey
+                taskFileJSON.cacheKey = identifierGen("ck");
+
                 // Write the changes to the file
                 taskFileJSON = JSON.stringify(taskFileJSON, null, 4);
                 fs.writeFile(taskDir, taskFileJSON, (err) => {
                     if (err) console.error(err);
                 });
                 console.info("Task created!");
-                return taskParent;
+
+                return [taskParent, taskFileJSON.cacheKey];
             }).catch(err => {
                 throw new Error(err);
             })
@@ -620,40 +625,7 @@ async function fetchCategory(reqBody) {
                 });
             }
 
-            // Check if the list is undefined, if so, return all lists
-            if (list == undefined) {
-                console.log("No tasklist specified, fetching all lists!");
-                // Initiate the array to hold all lists
-                var lists = [];
-                // Push the ALL tasklist to the array
-                lists.push(dbFileJSON.all.properties);
-                // Push all other lists to the array
-                dbFileJSON.all.lists.forEach(list => {
-                    lists.push(list.properties);
-                });
-                // Finally, push the completed tasks list
-                lists.push(dbFileJSON.completed.properties);
-                // console.log(tasklists);
-                console.log("returning tasklists");
-                return [lists, dbFileJSON.cacheKey];
-            } else {
-                // check if the tasklist is the completed list
-                if (list == dbFileJSON.completed.properties.id) {
-                    return dbFileJSON.completed;
-                }
-
-                // Tasklist is defined, grab that list and send it to the user.
-                var getTasklist = function(tasklist) {
-                    dbFileJSON.all.lists.forEach(element => {
-                        if (element.properties.id == tasklist) {
-                            tasklist = element;
-                            return tasklist;
-                        }
-                    });
-                    return tasklist;
-                }
-                return [getTasklist(list), dbFileJSON.cacheKey];
-            }
+            return [dbFileJSON, dbFileJSON.cacheKey];
         }).catch(err => {
             console.log(err.errno);
             if (err.errno == -4058) {
