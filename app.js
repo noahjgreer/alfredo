@@ -65,10 +65,12 @@ app.post('/', async (req, res) => {
                 });
                 break;
             case "fetchTasks":
-                await fetchTasks(req.body.token, req.body.list).then(data => {
+                console.log(req.body);
+                await fetchCategory(req.body).then(data => {
                     console.log(data);
                     return res.status(200).json({
-                        response: data,
+                        response: data[0],
+                        cacheKey: data[1],
                     });
                 }).catch(err => {
                     console.error(err);
@@ -222,7 +224,7 @@ async function createNew(body) {
     }
 
 
-    switch (object.type) {
+    switch (object.type.toLowerCase()) {
         case "task": 
             console.info("Creating a new task!");
 
@@ -562,45 +564,95 @@ async function getUUID(token) {
     }
 }
 
-async function fetchTasks(token, tasklist) {
-    console.log("fetchTasks called");
+async function fetchCategory(reqBody) {
+    // Unpack the request body
+    var token = reqBody.token;
+    var list = reqBody.list;
+    var category = reqBody.category;
+    var cacheKey = reqBody.cacheKey || undefined;
+
+
+    // Tell the console we recieved a request
+    console.log("fetchCategory called");
+    // Check for the token validity
     const checkToken = await checkTokenCache(token);
+    // If the token is valid, continue
     if (checkToken) {
+        // Get the User's Unique ID
         const uuid = await getUUID(token);
-        const taskDir = "F:/web-private/alfredo/lists/" + uuid + "/tasks.json";
+
+        // Initiate the taskDir variable
+        var catDir;
+
+        // Check if the category is valid, and set the taskDir variable based on it's value
+        switch (category) {
+            case "tasks":
+                // Create the User's Tasklist Directory
+                catDir = "F:/web-private/alfredo/lists/" + uuid + "/tasks.json";
+                break;
+            default:
+                throw new Error("Invalid category of: " + category);
+        }
+
         // Check if user has a tasklist, if not, create one
-        return fsp.readFile(taskDir, 'utf8').then((taskFile) => {
-            var taskFileJSON = JSON.parse(taskFile);
-            console.log(tasklist);
-            if (tasklist == undefined) {
+        return fsp.readFile(catDir, 'utf8').then((databaseFile) => {
+            // Parse the tasklist Database
+            var dbFileJSON = JSON.parse(databaseFile);
+
+            // Check if the cacheKey matches the current cache, if so, return.
+            if (cacheKey != undefined) { // If the cacheKey is not passed into the reqBody, skip this check and continue
+                if (cacheKey == dbFileJSON.cacheKey) { // Check if the cacheKey matches the database's cacheKey
+                    console.log("CacheKey matches, returning!");
+                    return [undefined, dbFileJSON.cacheKey];
+                } 
+            }
+
+            // Check if the database's cacheKey is undefined, if so, generate a new one
+            if (dbFileJSON.cacheKey == undefined) {
+                console.log("CacheKey is undefined, generating a new one!");
+                dbFileJSON.cacheKey = identifierGen("ck");
+
+                // Write the changes to the file
+                let dbFileJSONtoWrite = dbFileJSON;
+                dbFileJSONtoWrite = JSON.stringify(dbFileJSONtoWrite, null, 4);
+                fs.writeFile(catDir, dbFileJSONtoWrite, (err) => {
+                    if (err) console.error(err);
+                });
+            }
+
+            // Check if the list is undefined, if so, return all lists
+            if (list == undefined) {
                 console.log("No tasklist specified, fetching all lists!");
-                var tasklists = [];
-                tasklists.push(taskFileJSON.all.properties);
-                taskFileJSON.all.lists.forEach(list => {
-                    tasklists.push(list.properties);
+                // Initiate the array to hold all lists
+                var lists = [];
+                // Push the ALL tasklist to the array
+                lists.push(dbFileJSON.all.properties);
+                // Push all other lists to the array
+                dbFileJSON.all.lists.forEach(list => {
+                    lists.push(list.properties);
                 });
                 // Finally, push the completed tasks list
-                tasklists.push(taskFileJSON.completed.properties);
+                lists.push(dbFileJSON.completed.properties);
                 // console.log(tasklists);
                 console.log("returning tasklists");
-                return tasklists;
+                return [lists, dbFileJSON.cacheKey];
             } else {
                 // check if the tasklist is the completed list
-                if (tasklist == taskFileJSON.completed.properties.id) {
-                    return taskFileJSON.completed;
+                if (list == dbFileJSON.completed.properties.id) {
+                    return dbFileJSON.completed;
                 }
 
                 // Tasklist is defined, grab that list and send it to the user.
                 var getTasklist = function(tasklist) {
-                    taskFileJSON.all.lists.forEach(element => {
-                    if (element.properties.id == tasklist) {
-                        tasklist = element;
-                        return tasklist;
-                    }
+                    dbFileJSON.all.lists.forEach(element => {
+                        if (element.properties.id == tasklist) {
+                            tasklist = element;
+                            return tasklist;
+                        }
                     });
                     return tasklist;
                 }
-                return getTasklist(tasklist);
+                return [getTasklist(list), dbFileJSON.cacheKey];
             }
         }).catch(err => {
             console.log(err.errno);
@@ -623,10 +675,10 @@ async function fetchTasks(token, tasklist) {
                     }
                 }
                 tasklistNew = JSON.stringify(tasklistNew, null, 4);
-                fs.writeFile(taskDir, tasklistNew, (err) => {
+                fs.writeFile(catDir, tasklistNew, (err) => {
                     if (err) console.error(err);
                 });
-                return fetchTasks(token, tasklist);
+                return fetchCategory(token, list);
             } else {
                 console.log(err);
             }
@@ -669,6 +721,11 @@ function identifierGen(type, length, numOnly) {
             prefix = "tsk_";
             length = 6;
             numOnly = true;
+            break;
+        case "ck":
+            prefix = "ck_";
+            length = 6;
+            numOnly = false;
             break;
         default:
             prefix = "any_";
