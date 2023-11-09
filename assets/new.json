@@ -1,0 +1,50 @@
+{
+    // These first parent objects are the main categories
+    "Task": {
+        // These are the subsections for the user to fill out.
+        // The key's name will be displayed as a header
+        "Task Information": [
+            // This array will hold each option, along with it's type.
+            /*
+            Here are the types of the options:
+            - dropdown
+            - textInput
+            */
+            {
+                "name": "Task Type",
+                "type": "dropdown",
+                "id": "taskType",
+                "variable": false,
+                "options": [
+                    "Task",
+                    "Routine",
+                    "Event"
+                ]
+            }
+        ],
+        "": [
+            {
+                "name": "Task Title",
+                "type": "textInput",
+                "id": "taskName"
+            },
+            {
+                "name": "Task Description",
+                "type": "textInput",
+                "id": "taskDescription"
+            },
+            {
+                "name": "List",
+                "type": "dropdown",
+                "id": "taskList",
+                "variable": true
+            }
+        ]
+    },
+    "List": {
+
+    },
+    "Integration": {
+
+    }
+}

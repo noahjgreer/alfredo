@@ -3,7 +3,7 @@ let defaultSection = 'tasks';
 let firstPageLoad = true;
 let baseThemeColor = document.querySelector('meta[name="theme-color"]');
 let sectionScripts = document.querySelectorAll('.section-script');
-let sectionParamsCache = localStorage.getItem('sectionParams') ? JSON.parse(localStorage.getItem('sectionParams')) : {};
+let sectionParamsCache = sessionStorage.getItem('sectionParams') ? JSON.parse(sessionStorage.getItem('sectionParams')) : {};
 let fetchedCategories = {
     tasks: {},
     routines: {},
@@ -28,13 +28,17 @@ async function fetchFooterContent() {
     .then(response => response.json())
     .then(data => {
         footerContent = document.createElement('footer');
+        iconContainer = document.createElement('div');
+        iconContainer.setAttribute('id', 'icon-container');
+
         data.pages.forEach(element => {
-            footerContent.innerHTML += `
+            iconContainer.innerHTML += `
             <a onclick="loadSection('${element.section}')" id="${element.section}">
-                <img src="${element.icon}" alt="" class="footer-icon">
-                <caption>${element.name}</caption>
+                <img src="${element.icon}">
+                <p>${element.name}</p>
             </a>`;
         });
+        footerContent.appendChild(iconContainer);
         document.body.appendChild(footerContent);
     });
 }
@@ -81,118 +85,120 @@ function headerVisibilityHandler() {
 }
 
 async function loadSection(section, args) {
+    // Copy the Arguments so that they won't be forgotten
     let newArgs = args;
     
     if (firstPageLoad) {
-            // Clear URL Params on first page load to prevent unsolved errors.
-            updateURLParams('reset');
+        // Clear URL Params on first page load to prevent unsolved errors.
+        updateURLParams('reset');
+        // Check for Token and other User Attributes
+        if (localStorage.getItem('token') != null && localStorage.getItem('uuid') != null && localStorage.getItem('name') != null && localStorage.getItem('settings') != null) {
+            await fetchFooterContent().then(() => {
+                firstPageLoad = false;
+            });
+        } else {
+            console.error('Something wasnt found!');
+            localStorage.removeItem('token');
+            localStorage.removeItem('uuid');
+            localStorage.removeItem('name');
+            localStorage.removeItem('settings');
+            window.location.href = 'index.html';
+        }
+    }
+    
+    // Cache Current Section Params before loading the called section
+    previousSection = document.querySelector('section').getAttribute('id') ? document.querySelector('section').getAttribute('id') : defaultSection;
+    updateSectionParamsCache(previousSection);
 
-            // Check for Token
-            if (localStorage.getItem('token') != null && localStorage.getItem('uuid') != null && localStorage.getItem('name') != null && localStorage.getItem('settings') != null) {
-                await fetchFooterContent().then(() => {
-                    firstPageLoad = false;
-                });
-            } else {
-                console.log('something wasnt found');
-                localStorage.removeItem('token');
-                localStorage.removeItem('uuid');
-                localStorage.removeItem('name');
-                localStorage.removeItem('settings');
-                window.location.href = 'index.html';
+    // Update Section
+    // Check for section params in cache, otherwise use default
+    if (sectionParamsCache[section]) {
+        updateURLParams('set', sectionParamsCache[section]);
+        // Recall the cached pages
+        for (let i = 0; i < Object.keys(URLparams).length; i++) {
+            const element = Object.keys(URLparams)[i];
+            if (element.includes('page')) {
+                let elementArgs = JSON.parse(decodeURI(URLparams[Object.keys(URLparams)[i]]));
+                loadPage(elementArgs.page, elementArgs, true);
             }
         }
-        // Cache Current Section Params
-        previousSection = document.querySelector('section').getAttribute('id') ? document.querySelector('section').getAttribute('id') : defaultSection;
-        updateSectionParamsCache(previousSection);
+    } else {
+        updateURLParams('set', ['tab', section]);
+    }
+    // updateURLParams('set', ['tab', section]);
+    document.querySelectorAll('.sub-body').forEach(element => {
+        element.remove();
+    });
+    let content = document.querySelector('section');
+    if (section == content.getAttribute('id')) return;        
+    let fetchedHTML = document.createElement('html');
+    let tabs = document.querySelectorAll('footer > #icon-container > a');
+    let tab; 
+    tabs.forEach(element => {
+       if (element.getAttribute('id') == section) {
+           tab = element;
+       }
+    });
+    // let tab = document.querySelector(`footer > #icon-container > a#${section}`);
+    tabs.forEach(element => {
+        element.classList.remove('selected');
+    });
+    tab ? tab.classList.add('selected') : null;
+    content.setAttribute('id', section);
 
-        // Update Section
-        // Check for section params in cache, otherwise use default
-        if (sectionParamsCache[section]) {
-            updateURLParams('set', sectionParamsCache[section]);
-            // Recall the cached pages
-            for (let i = 0; i < Object.keys(URLparams).length; i++) {
-                const element = Object.keys(URLparams)[i];
-                if (element.includes('page')) {
-                    let elementArgs = JSON.parse(decodeURI(URLparams[Object.keys(URLparams)[i]]));
-                    loadPage(elementArgs.page, elementArgs, true);
-                }
+    content.innerHTML = '';
+    var taskBody = await fetch(`/sections/${section}.html`)
+    .then(response => {
+        if (!response.ok) {
+            if (response.status == 404) {
+                console.error(response);
+                throw new Error(response.status);
             }
         } else {
-            updateURLParams('set', ['tab', section]);
+            return response.text();
         }
-
-
-        // updateURLParams('set', ['tab', section]);
-        document.querySelectorAll('.sub-body').forEach(element => {
+    })
+    .then(data => {
+        // Remove section scripts from previous section
+        sectionScripts.forEach(element => {
             element.remove();
         });
-        let content = document.querySelector('section');
-        if (section == content.getAttribute('id')) return;        
-        let fetchedHTML = document.createElement('html');
-        let tabs = document.querySelectorAll('footer > a');
-        let tab = document.querySelector(`footer > a#${section}`);
-        tabs.forEach(element => {
-            element.classList.remove('selected');
-        });
-        tab ? tab.classList.add('selected') : null;
-        content.setAttribute('id', section);
-    
-        content.innerHTML = '';
-        var taskBody = await fetch(`/sections/${section}.html`)
-        .then(response => {
-            if (!response.ok) {
-                if (response.status == 404) {
-                    console.error(response);
-                    throw new Error(response.status);
-                }
-            } else {
-                return response.text();
-            }
-        })
-        .then(data => {
-            // Remove section scripts from previous section
-            sectionScripts.forEach(element => {
-                element.remove();
+        fetchedHTML.innerHTML = data;
+        content.innerHTML = fetchedHTML.querySelector('body').innerHTML;
+        fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
+        fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');
+        if (fetchedHTML.querySelectorAll('script').length > 0) {
+            fetchedHTML.querySelectorAll('script').forEach(element => {
+                var script = document.createElement('script');
+                element.getAttribute('src') ? script.setAttribute('src', element.getAttribute('src')) : null;
+                script.classList.add('section-script');
+                script.innerHTML = element.innerHTML;
+                document.body.appendChild(script);
+                sectionScripts = document.querySelectorAll('.section-script');
             });
-
-            fetchedHTML.innerHTML = data;
-            content.innerHTML = fetchedHTML.querySelector('body').innerHTML;
-            fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
-            fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');
-            if (fetchedHTML.querySelectorAll('script').length > 0) {
-                fetchedHTML.querySelectorAll('script').forEach(element => {
-                    var script = document.createElement('script');
-                    element.getAttribute('src') ? script.setAttribute('src', element.getAttribute('src')) : null;
-                    script.classList.add('section-script');
-                    script.innerHTML = element.innerHTML;
-                    document.body.appendChild(script);
-                    sectionScripts = document.querySelectorAll('.section-script');
-                });
-            }
-            
-
-            // Check for extra args, and load them using loadPage
-            if (newArgs) {
-                console.log(newArgs.replace(/&quot;/g, '\"'));
-                newArgs = JSON.parse(newArgs.replace(/&quot;/g, '\"'));
-                loadPage(newArgs.page, newArgs, true);
-            }
-
-            scrollabilityUpdate();
-            if (listableSections.includes(section)) {
-                let taskBody = document.querySelector('#tasks .tasklist'); // Get the taskBody element
-                taskBody.id = "lists";
-                fetchFromCategory('tasks', undefined, taskBody, true);
-                return taskBody;
-            }
-        }).catch(error => {
-            if (error == "Error: 404") {
-                callAlert('404: Page Not Found', 'The requested section was not found. Please try again.');
-            }
-            console.log(error);
-            content.innerHTML = '<h1>404</h1>';
-        });
-        return taskBody;
+        }
+        
+        // Check for extra args, and load them using loadPage
+        if (newArgs) {
+            console.log(newArgs.replace(/&quot;/g, '\"'));
+            newArgs = JSON.parse(newArgs.replace(/&quot;/g, '\"'));
+            loadPage(newArgs.page, newArgs, true);
+        }
+        scrollabilityUpdate();
+        if (listableSections.includes(section)) {
+            let taskBody = document.querySelector('#tasks .tasklist'); // Get the taskBody element
+            taskBody.id = "lists";
+            fetchFromCategory('tasks', undefined, taskBody, true);
+            return taskBody;
+        }
+    }).catch(error => {
+        if (error == "Error: 404") {
+            callAlert('404: Page Not Found', 'The requested section was not found. Please try again.');
+        }
+        console.log(error);
+        content.innerHTML = '<h1>404</h1>';
+    });
+    return taskBody;
 }
 
 /**
@@ -308,7 +314,7 @@ async function createNew(passObject, referenceData) {
     console.log(caller);
 
     // Check Object Type
-    switch (passObject.type) {
+    switch (passObject.type.toLowerCase()) {
         case 'task':
             // Handle Missing Fields
             if (!passObject.name) {

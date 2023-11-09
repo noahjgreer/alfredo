@@ -211,6 +211,8 @@ section {
         text-align: left;
         h3, p {
             margin: 0px;
+            word-wrap: break-word;
+            word-break: break-word;
         }
         .check {
             width: 1.25rem;
@@ -261,37 +263,76 @@ header {
 }
 
 footer {
+    // Layout
     display: flex;
-    width: 100%;
     position: fixed;
+    z-index: 99;
     bottom: 0;
-    border-top: 0.5px solid $unselected-color;
-    padding: 0.1rem 0%;
-    justify-content: space-around;
-    background-color: #ffffffee;
-    backdrop-filter: $backdrop-blur;
-    z-index: 98;
-    .footer-icon {
-        width: 1.5rem;
-        height: 1.5rem;
-        padding-block: 0.275rem;
-        aspect-ratio: 1/1;
+    width: 100%;
+    // height: 5.1875rem;
+    padding: 0.21875rem 0rem 0rem 0rem;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+
+    // Style
+    background: var(--materials-chrome, rgba(255, 255, 255, 0.75));
+    background-blend-mode: hard-light;
+    box-shadow: 0px -0.5px 0px 0px rgba(0, 0, 0, 0.30);
+    backdrop-filter: blur(25px);
+    #icon-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        padding: 0.15rem 0.5rem;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-shrink: 0;
+        box-sizing: border-box;
     }
+    
     a {
         display: flex;
+        width: 3rem;
+        height: 2.5rem;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.0375rem;
+        flex-shrink: 0;
+        margin: 0px;
+        /*display: flex;
         flex-direction: column;
         align-items: center;
         font-size: 0.65rem;
         font-weight: 500;
         margin: 0px;
-        flex: 1;
+        flex: 1;*/
         img {
+            width: auto;
+            height: 2rem;
+
+            text-align: center;
+            font-size: 1.125rem;
+            font-style: normal;
+            font-weight: 510;
+            line-height: normal;
             filter: $unselected-icon-color;
         }
-        color: $unselected-color;
+        p {
+            margin: 0px;
+            text-align: center;
+            font-size: 0.625rem;
+            font-style: normal;
+            font-weight: 510;
+            line-height: normal;
+            color: $unselected-color;
+        }
     }
     a.selected {
-        color: $hyperlink-color;
+        p {
+            color: $hyperlink-color;
+        }
         img {
             filter: $hyperlink-icon-color;
         }
@@ -299,11 +340,11 @@ footer {
 }
 
 .img-reference {
-    z-index: 99;
+    z-index: 1000;
     position: fixed;
     width: 100%;
     opacity: 50%;
-    bottom: 7.5rem;
+    bottom: 0rem;
     left: 0px;
     // mix-blend-mode: difference;
 }
@@ -312,6 +353,7 @@ footer {
     display: flex;
     align-items: center;
     position: absolute;
+    overflow-x: hidden;
     background-color: white;
     padding: $body-standard-margin;
     height: calc(100% - (2 * $body-standard-margin-block));

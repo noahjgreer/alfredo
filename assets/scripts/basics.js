@@ -25,6 +25,14 @@ function updateURLParamsObject() {
     }
 }
 
+function removeCommentsFromJSON(jsonString) {
+    // Remove single line comments
+    jsonString = jsonString.replace(/\/\/.*$/gm, '');
+    // Remove multi-line comments
+    jsonString = jsonString.replace(/\/\*[\s\S]*?\*\//gm, '');
+    return jsonString;
+}
+
 function updateSegmentedControl(call, element) {
     switch (call) {
         case 'init':
@@ -81,7 +89,16 @@ function updateSegmentedControl(call, element) {
     }    
 }
 
-
+/**
+ * Updates the URL parameters based on the provided method and object.
+ *
+ * @param {string} method - The method to use for updating the URL parameters. 
+ *                          This can be "add", "set", "reset", or "remove".
+ * @param {(string|Object)} object - The object to use for updating the URL parameters. 
+ *                                   If a string is provided, it should be in the format "key=value".
+ *                                   If an object is provided, it should be in the format {key: value}.
+ *                                   If an array is provided, it should be in the format [[key1, value1], [key2, value2], ...].
+ */
 function updateURLParams(method, object) {
     var newURLparams = '?';
     // Check if the inputted object has a ? at the start, and remove it if it does
@@ -171,6 +188,11 @@ function updateURLParams(method, object) {
     window.history.pushState('', '', newURLparams);
 }
 
+/**
+ * Simply updates the section parameters cache in localStorage for a specific section, taking from the window URL bar.
+ *
+ * @param {string} section - The name of the section for which to update the parameters cache to.
+ */
 function updateSectionParamsCache(section) {
     sectionParamsCache[section] = window.location.search + window.location.hash;
     sessionStorage.setItem('sectionParamsCache', JSON.stringify(sectionParamsCache));
@@ -287,11 +309,25 @@ if (enableDebug) {
 //#region Alert
 
 //Simple function made to create nodes
+/**
+ * Creates a new HTML element with the specified attributes and inner text.
+ *
+ * @param {string} nodetype - The type of the HTML element to create (e.g., 'div', 'span', 'a').
+ * @param {Array<Array<string>>} attributes - An array of attribute pairs, where each pair is an array of two strings: the attribute name and value.
+ * @param {string} [innertext] - The inner text to set for the new element. If not provided, the element will be created without any inner text.
+ * @returns {HTMLElement} The newly created HTML element.
+ */
 function createElement(nodetype, attributes, innertext) {
     var node = document.createElement(nodetype);
-    attributes.forEach(element => {
-        node.setAttribute(element[0], element[1]);
-    });
+    if (attributes != undefined) {
+        attributes.forEach(element => {
+            if (element.length != 2) {
+                node.setAttribute(element[0], "");
+            } else {
+                node.setAttribute(element[0], element[1]);
+            }
+        });
+    }
     if (innertext) node.innerHTML = innertext;
     return node;
 }
