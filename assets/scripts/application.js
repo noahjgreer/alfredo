@@ -490,7 +490,7 @@ async function createNew(passObject, referenceData) {
                         caller.setAttribute('onclick', caller.previousOnClick);
                         caller.style.backgroundColor = caller.previousBGC;
                         caller.innerHTML = caller.previousInnerHTML;
-                    }, 50000);
+                    }, 5000);
                 }
                 console.log(data);
                 if (data.response) {
