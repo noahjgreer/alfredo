@@ -177,7 +177,7 @@ async function loadSection(section, args) {
         // Clear URL Params on first page load to prevent unsolved errors.
         updateURLParams('reset');
         // Check for Token and other User Attributes
-        validateUserDataPresence();
+        await validateUserDataPresence();
     }
     
     // Cache Current Section Params before loading the called section
