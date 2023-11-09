@@ -11,6 +11,64 @@ let fetchedCategories = {
 };
 let listableSections = ['tasks', 'routines', 'events'];
 
+cacheDatabaseHandler('get', 'tasks');
+
+async function databaseLocalStorage(eventType) {
+    switch (eventType) {
+        case 'init':
+            // Check for the precense of a taskDatabase in localStorage
+            if (!localStorage.getItem('database')) {
+                // If it doesn't exist, ask the server for it
+            }
+    }
+}
+
+function cacheKeyHandler(event, category, key) {
+    // Initiate the cacheKeys object
+    let cacheKeys;
+    
+    // Check if the cacheKeys object exists in localStorage
+    if (localStorage.getItem(`cacheKeys`)) {
+        cacheKeys = JSON.parse(localStorage.getItem(`cacheKeys`));
+    } else {
+        cacheKeys = {};
+    }
+
+    switch (event) {
+        case 'get':
+            return cacheKeys[category];
+            break;
+        case 'set':
+            // Set the cache key in the object
+            cacheKeys[category] = key;
+
+            // Save the cacheKeys object to localStorage
+            localStorage.setItem(`cacheKeys`, JSON.stringify(cacheKeys));
+            break;
+    }
+}
+
+function cacheDatabaseHandler(event, category, data) {
+    switch (event) {
+        case 'get':
+            fetchedCategories = JSON.parse(localStorage.getItem(`database`));
+            return fetchedCategories;
+            break;
+        case 'set':
+            fetchedCategories = {};
+            if (!localStorage.getItem(`database`)) {
+                localStorage.setItem(`database`, JSON.stringify({}));
+            }
+            var newDatabase = JSON.parse(localStorage.getItem(`database`));
+            newDatabase[category] = data;
+            localStorage.setItem(`database`, JSON.stringify(newDatabase));
+            fetchedCategories[category] = data;
+            return;
+            break;
+    }
+}
+
+
 // Fetch tasks from default section on page load
 async function init() {
     let taskBody = await loadSection('tasks');
@@ -84,6 +142,33 @@ function headerVisibilityHandler() {
     console.log(onVisibilityChange(document.querySelector('#hd0')));
 }
 
+/**
+ * Validates the presence of required user data in localStorage.
+ * If all required data are present, fetches the footer content and sets firstPageLoad to false.
+ * If any required data are missing, removes all required data from localStorage and redirects the user to index.html.
+ *
+ * @returns {Promise} A promise that resolves when the validation is complete.
+ */
+async function validateUserDataPresence() {
+    // Define the items that are required to be in localStorage
+    const requiredItems = ['token', 'uuid', 'name', 'settings'];
+
+    // Check if all required items are present in localStorage
+    if (requiredItems.every(item => localStorage.getItem(item) !== null)) {
+        // If all required items are present, fetch the footer content
+        await fetchFooterContent();
+        // Set firstPageLoad to false to indicate that the first page load has completed
+        firstPageLoad = false;
+    } else {
+        // If any required item is missing, log an error message to the console
+        console.error('Something wasn\'t found!');
+        // Remove all required items from localStorage
+        requiredItems.forEach(item => localStorage.removeItem(item));
+        // Redirect the user to index.html
+        window.location.href = 'index.html';
+    }
+}
+
 async function loadSection(section, args) {
     // Copy the Arguments so that they won't be forgotten
     let newArgs = args;
@@ -92,18 +177,7 @@ async function loadSection(section, args) {
         // Clear URL Params on first page load to prevent unsolved errors.
         updateURLParams('reset');
         // Check for Token and other User Attributes
-        if (localStorage.getItem('token') != null && localStorage.getItem('uuid') != null && localStorage.getItem('name') != null && localStorage.getItem('settings') != null) {
-            await fetchFooterContent().then(() => {
-                firstPageLoad = false;
-            });
-        } else {
-            console.error('Something wasnt found!');
-            localStorage.removeItem('token');
-            localStorage.removeItem('uuid');
-            localStorage.removeItem('name');
-            localStorage.removeItem('settings');
-            window.location.href = 'index.html';
-        }
+        validateUserDataPresence();
     }
     
     // Cache Current Section Params before loading the called section
@@ -202,9 +276,10 @@ async function loadSection(section, args) {
 }
 
 /**
- * Updates the task list with the given tasks.
+ * Updates the tasklist HTMLElement with the provided tasks array.
  * @param {Array} tasks - An array of task objects to display in the task list.
  * @param {boolean} isLists - A boolean indicating whether the inputted array ("tasks") is a list of tasks, or a list of lists. (Default: false)
+ * @param {HTMLElement} taskBody - The task list element to update with the fetched data. If one is not found, the default task list will be used. (optional)
  * @returns {void}
  */
 async function updateTasks(tasks, isLists, taskBody) {
@@ -259,27 +334,29 @@ async function updateTasks(tasks, isLists, taskBody) {
         tasklist.innerHTML = '';
         let taskElement;
         // Loop through the provided tasks array, if it contains items
-        if (tasks.tasks.length != 0) {
-            tasks.tasks.forEach(element => {
-                var taskElementBase = 'task';
-                taskElement = document.createElement('div');
-                taskElement.classList.add('task');
-                taskElement.id = element.id;
-                taskElement.innerHTML = `
+        console.log(taskBody);
+        if (taskBody.parentElement.id != 'tasklist-all') {
+            if (tasks.tasks.length != 0) {
+                tasks.tasks.forEach(element => {
+                    var taskElementBase = 'task';
+                    taskElement = document.createElement('div');
+                    taskElement.classList.add('task');
+                    taskElement.id = element.id;
+                    taskElement.innerHTML = `
                 <a class="check" onclick="markTaskComplete('${element.id}')"></a>
                 <div class="task-content">
                     <p>${element.name}</p>
                     <h3>${element.description}</h3>
                 </div>
-                `;
-                tasklist.appendChild(taskElement);
-                var taskElementArgs = {
+                    `;
+                    tasklist.appendChild(taskElement);
+                    var taskElementArgs = {
                     parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
                     id: element.id,
-                };
-                // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
-            });    
-        } else {
+                    };
+                    // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
+                });    
+            } else {
             // Set a motivational quote on the page instead
             if (JSON.parse(localStorage.getItem('settings')).motivation) {
                 var bibleMotivation = await getMotivation();
@@ -291,12 +368,57 @@ async function updateTasks(tasks, isLists, taskBody) {
                 <p class="subtle">You're all caught up!</p>
                 `;
             }
+            }
+        } else {
+            if (tasks.lists.length != 0) {
+                tasks.lists.forEach(element => {
+                    element.tasks.forEach(task => {
+                        var taskElementBase = 'task';
+                        taskElement = document.createElement('div');
+                        taskElement.classList.add('task');
+                        taskElement.id = task.id;
+                        taskElement.innerHTML = `
+                    <a class="check" onclick="markTaskComplete('${task.id}')"></a>
+                    <div class="task-content">
+                        <p>${task.name}</p>
+                        <h3>${task.description}</h3>
+                    </div>
+                        `;
+                        tasklist.appendChild(taskElement);
+                        var taskElementArgs = {
+                        parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
+                        id: task.id,
+                        };
+                        // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
+                    });    
+                });
+            } else {
+                // Set a motivational quote on the page instead
+                if (JSON.parse(localStorage.getItem('settings')).motivation) {
+                    var bibleMotivation = await getMotivation();
+                    tasklist.innerHTML = `
+                    <p class="subtle">You're all caught up! <br><br> ${bibleMotivation}</p>
+                    `;
+                } else {
+                    tasklist.innerHTML = `
+                    <p class="subtle">You're all caught up!</p>
+                    `;
+                }
+            }
         }
         // console.log(tasklist);
     }
 }
 
-
+/**
+ * Creates a new "thing" of the specified type and sends it to the server for database storage.
+ *
+ * @param {Object} passObject - The object to create. This object should have a 'type' property that specifies the type of the object (e.g., 'task'), and other properties as needed for the object type.
+ * @param {Object} [referenceData] - Optional reference data to use when creating the object. If provided, this should be an object with a 'caller' property that refers to the HTML element that initiated the create operation.
+ * @returns {Promise} A promise that resolves when the create operation is complete.
+ *
+ * @throws Will throw an error if the 'type' property of 'passObject' is not recognized.
+ */
 async function createNew(passObject, referenceData) {
     // Create Variables
     let caller;
@@ -405,7 +527,10 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                 taskBody.innerHTML = `
                 <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
                 `;
-            }            
+            }
+            
+            
+
             return await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
                 method: 'POST',
                 headers: {
@@ -414,7 +539,9 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                 body: JSON.stringify({
                     purpose: "fetchTasks",
                     token: localStorage.getItem('token'),
-                    list: list
+                    list: list,
+                    category: category,
+                    cacheKey: cacheKeyHandler('get', category)
                 })
             }).then(response => {
                 if (!response.ok) {
@@ -432,12 +559,44 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                 return response.json();
             }).then(data => {
                 let isListsArray;
+                let dataResponse;
+                let parsedDataResponse = [];
                 // console.log(category, listCopy, taskBody, isLists, data.response);
-                if (list == undefined) {
-                    isListsArray = true;
-                    fetchedCategories.tasks = data.response;
-                } else {
+
+                // Update the cache key and determine the data response
+                if (data.cacheKey != cacheKeyHandler('get', category) && data.cacheKey != undefined) {
+                    cacheKeyHandler('set', category, data.cacheKey);
+                    cacheDatabaseHandler('set', category, data.response);
+                    console.log(dataResponse);
+                }
+
+                cacheDatabaseHandler('get');
+                // dataResponse = fetchedCategories.tasks;
+                dataResponse = parseDatabaseToFormat('listsFull', 'tasks');
+
+
+                // Parse the data response
+                if (listCopy) {
                     isListsArray = false;
+                    // dataResponse.all.lists.forEach(element => {
+                    //     if (element.properties.id == list) {
+                    //         parsedDataResponse = element;
+                    //     }
+                    // });
+                    dataResponse.forEach(element => {
+                        if (element.properties.id == list) {
+                            parsedDataResponse = element;
+                        }
+                    });
+                    console.log("is a list");
+                } else { // If no list is specified, then the response is all lists
+                    isListsArray = true;
+                    parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
+                }
+
+                /*if (list == undefined) {
+                    fetchedCategories.tasks = dataResponse.tasks;
+                } else {
                     if (fetchedCategories.tasks.lists) {
                         fetchedCategories.tasks.lists.forEach(element => {
                             if (element.id == list[0]) {
@@ -445,11 +604,12 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                             }
                         });
                     }
-                }
+                }*/
                 if (!returnData) {
-                    updateTasks(data.response, isListsArray, taskBodyCopy);
+                    console.log(parsedDataResponse);
+                    updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
                 } else {
-                    return data.response;
+                    return parsedDataResponse;
                 }
             })
             // .catch(err => {

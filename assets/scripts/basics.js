@@ -583,7 +583,8 @@ async function loadPage(page, args, isCache) {
         fetchFromCategory('tasks', pageArgs.id, subBody.querySelector('.tasklist'), false);
         if (page == 'tasklist' && isCache) {
             if (Object.keys(fetchedCategories.tasks).length != 0) {
-                fetchedCategories.tasks.forEach(element => {
+                let fetchedTaskLists = parseDatabaseToFormat('lists', 'tasks');
+                fetchedTaskLists.forEach(element => {
                     if (args.id == element.id) {
                         subBody.querySelector('.section-header > .content > .left > h1').innerHTML = element.name; 
                     }
@@ -652,13 +653,44 @@ function getNameFromTaskQuery(query, isList) {
         }
 
     } else {
-        fetchedCategories.tasks.forEach(element => {
+        parseDatabaseToFormat('lists', 'tasks').forEach(element => {
             if (query == element.id) {
                 taskName = element.name;
             }
         });
     }
     return taskName;
+}
+
+function parseDatabaseToFormat(format, category) {
+    let response;
+    switch (format) {
+        case 'lists':
+            response = [];
+            // Push the ALL tasklist to the array
+            response.push(fetchedCategories[category].all.properties);
+            // Push all other lists to the array
+            fetchedCategories[category].all.lists.forEach(list => {
+                response.push(list.properties);
+            });
+            // Finally, push the completed tasks list
+            response.push(fetchedCategories[category].completed.properties);
+            return response;
+        case 'listsFull':
+            response = [];
+            // Push the ALL tasklist to the array
+            response.push(fetchedCategories[category].all);
+            // Push all other lists to the array
+            fetchedCategories[category].all.lists.forEach(list => {
+                response.push(list);
+            });
+            // Finally, push the completed tasks list
+            response.push(fetchedCategories[category].completed);
+            return response;
+        default:
+            console.error('Invalid format of: "' + format + '"');
+            break;
+    }
 }
 
 function switchToggle(element, event) {
