@@ -334,7 +334,6 @@ async function updateTasks(tasks, isLists, taskBody) {
         tasklist.innerHTML = '';
         let taskElement;
         // Loop through the provided tasks array, if it contains items
-        console.log(taskBody);
         if (taskBody.parentElement.id != 'tasklist-all') {
             if (tasks.tasks.length != 0) {
                 tasks.tasks.forEach(element => {
@@ -528,9 +527,65 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                 <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
                 `;
             }
-            
-            
+            return await simpleFetch({
+                purpose: "fetchTasks",
+                token: localStorage.getItem('token'),
+                list: list,
+                category: category,
+                cacheKey: cacheKeyHandler('get', category)
+            }).then(data => {
+                let isListsArray;
+                let dataResponse;
+                let parsedDataResponse = [];
+                // console.log(category, listCopy, taskBody, isLists, data.response);
 
+                // Update the cache key and determine the data response
+                if (data.cacheKey != cacheKeyHandler('get', category) && data.cacheKey != undefined) {
+                    cacheKeyHandler('set', category, data.cacheKey);
+                    cacheDatabaseHandler('set', category, data.response);
+                }
+
+                cacheDatabaseHandler('get');
+                // dataResponse = fetchedCategories.tasks;
+                dataResponse = parseDatabaseToFormat('listsFull', 'tasks');
+
+
+                // Parse the data response
+                if (listCopy) {
+                    isListsArray = false;
+                    // dataResponse.all.lists.forEach(element => {
+                    //     if (element.properties.id == list) {
+                    //         parsedDataResponse = element;
+                    //     }
+                    // });
+                    dataResponse.forEach(element => {
+                        if (element.properties.id == list) {
+                            parsedDataResponse = element;
+                        }
+                    });
+                } else { // If no list is specified, then the response is all lists
+                    isListsArray = true;
+                    parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
+                }
+
+                /*if (list == undefined) {
+                    fetchedCategories.tasks = dataResponse.tasks;
+                } else {
+                    if (fetchedCategories.tasks.lists) {
+                        fetchedCategories.tasks.lists.forEach(element => {
+                            if (element.id == list[0]) {
+                                element.tasks = data.response.tasks;
+                            }
+                        });
+                    }
+                }*/
+                if (!returnData) {
+                    updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
+                } else {
+                    return parsedDataResponse;
+                }
+            });
+            /*
             return await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
                 method: 'POST',
                 headers: {
@@ -604,14 +659,14 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                             }
                         });
                     }
-                }*/
+                }
                 if (!returnData) {
                     console.log(parsedDataResponse);
                     updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
                 } else {
                     return parsedDataResponse;
                 }
-            })
+            });*/
             // .catch(err => {
             //     callAlert('An Error Occurred', "While fetching your tasks, the server sent back an error: " + err, window.location.href = 'index.html');
             // })    
@@ -631,12 +686,32 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
 }
 
 async function markTaskComplete(taskID) {
-    console.trace("markTaskComplete called");
+    // Tell the console that markTaskComplete has been called
+    console.trace("markTaskComplete called" + taskID);
+    // Validate the taskID based on its type
     if (typeof taskID != 'string') {
         console.error('Invalid taskID');
         return;
     } else {
-        await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+        // Tell the server to mark the task as complete
+        await simpleFetch({
+            purpose: "markTaskComplete",
+            token: localStorage.getItem('token'),
+            taskID: taskID
+        }).then(data => {
+            if (data) {
+                console.info(data);
+                var taskParent = data.response.taskParent;
+                var wasPreviouslyCompleted = data.response.wasPreviouslyCompleted;
+                if (!wasPreviouslyCompleted) {
+                    fetchFromCategory('tasks', taskParent, document.querySelector(`#tasklist-${taskParent}>.tasklist`), false);
+                } else {
+                    fetchFromCategory('tasks', 'completed', document.querySelector(`#tasklist-completed>.tasklist`), false);
+                    // document.querySelector(`#${taskID}`).remove();
+                }
+            }
+        });
+        /*await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -647,22 +722,13 @@ async function markTaskComplete(taskID) {
                 taskID: taskID
             })
         }).then(response => {
-            if (!response.ok) {
-                switch (response.status) {
-                    case 401:
-                        callAlert('Verification Failed', "Your authentication token is invalid. You will now return to the login page", function () {
-                            window.location.href = 'index.html';
-                        });
-                        console.log(response);
-                        break;
-                    default:
-                        callAlert('An Error Occurred: ' + response.status, "While fetching your tasks, the server sent back a bad response: " + response.statusText);
-                }
-            }
+            responseHandler(response);
+
             console.log(response);
             return response.json();
         }).then(data => {
             if (data) {
+                console.info(data);
                 var taskParent = data.response.taskParent;
                 var wasPreviouslyCompleted = data.response.wasPreviouslyCompleted;
                 if (!wasPreviouslyCompleted) {
@@ -672,7 +738,7 @@ async function markTaskComplete(taskID) {
                     // document.querySelector(`#${taskID}`).remove();
                 }
             }
-        })
+        })*/
     }
 }
 

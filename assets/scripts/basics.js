@@ -33,6 +33,46 @@ function removeCommentsFromJSON(jsonString) {
     return jsonString;
 }
 
+function responseHandler(response) {
+    if (!response.ok) {
+        switch (response.status) {
+            case 401:
+                callAlert('Verification Failed', "Your authentication token is invalid. You will now return to the login page", function () {
+                    window.location.href = 'index.html';
+                });
+                console.log(response);
+                break;
+            default:
+                callAlert('An Error Occurred: ' + response.status, "While fetching your tasks, the server sent back a bad response: " + response.statusText);
+        }
+    }
+}
+
+/**
+ * Sends a POST request to a specified URL with the provided body.
+ *
+ * @param {Object} body - The body of the POST request, which will be stringified into JSON.
+ * @returns {Promise<Object>} A promise that resolves with the data from the response, parsed as JSON.
+ * @throws {Error} Will throw an error if the fetch request fails for any reason.
+ */
+async function simpleFetch(body) {
+    return await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    }).then(response => {
+        responseHandler(response);
+
+        return response.json();
+    }).then(data => {
+        return data;
+    }).catch(error => {
+        console.error(error);
+    });
+}
+
 function updateSegmentedControl(call, element) {
     switch (call) {
         case 'init':
