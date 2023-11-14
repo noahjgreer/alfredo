@@ -450,6 +450,9 @@ async function markTaskComplete(token, taskID) {
             taskFileJSON.all.lists = allTasks;
             taskFileJSON.completed.tasks = completedList;
 
+            // Update the user's cacheKey
+            taskFileJSON.cacheKey = identifierGen("ck");
+
             // Write the changes to the file
             taskFileJSON = JSON.stringify(taskFileJSON, null, 4);
             fs.writeFile(taskDir, taskFileJSON, (err) => {
