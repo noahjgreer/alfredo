@@ -30,19 +30,65 @@
             })
         }
 
+        function updateSelectedType(caller) {
+            let url = updateURLParams('get');
+            if (url.section == caller.innerText) {
+                return;
+            }
+
+            // Visually Update the Segmented Control
+            updateSegmentedControl('updateActive', caller);
+
+            // Update the URL parameters
+            updateURLParams('set', [
+                ['tab', 'new'],['section', caller.innerText]
+            ]);
+
+            // Update the current section
+            loadTheNewSection();
+        }
+
         // Build the New section.
         async function loadTheNewSection() {
+            // Check the URL bar for any extra info
+            let url = updateURLParams('get');
+
             // Fetch the new section building blocks
-            const response = await fetch('/assets/new.json');
+            const response = await fetch('/assets/new.jsonc');
             const text = await response.text();
-            json = JSON.parse(removeCommentsFromJSON(text));
+            let json = JSON.parse(removeCommentsFromJSON(text));
+
+            
+
+            // Check if the URL has anything more than the simple "tab: new" pair
+            if (Object.keys(url).length == 1) { 
+                // It doesn't! Let's give it some data before continuing
+                // Load the default switch data
+                // updateURLParams('add', ['section', Object.keys(json)[0]]);
+                updateURLParams('add', ['section', 'Task']);
+                // Update the url variable
+                url = updateURLParams('get');
+            }
+
+            // Clear the page
+            Object.values(document.querySelector('section#new').children).forEach(child => {
+                if (Object.values(document.querySelector('section#new').children).indexOf(child) != 0) {
+                    child.remove();
+                }
+            });
+            
+            let currentSection = url.section;
+
+            // Store the callback and remove it from the json variable
+            let callback = JSON.stringify(json[currentSection].callback).replace(/"/g, "");
+            delete json[currentSection].callback;
 
             // Build the page's segment controller
             var segControl = createElement('div', [['class', 'seg-control focus']]);
 
             // Build the segcontrol's items
             Object.keys(json).forEach(element => {
-                var segControlItem = createElement('a', [['class', 'seg-control-item'], ['onclick', 'updateSegmentedControl(\'updateActive\', this)']]);
+                var segControlItem = createElement('a', [['class', 'seg-control-item'], ['onclick', 'updateSelectedType(this)']]);
                 segControlItem.innerText = element;
                 segControl.appendChild(segControlItem);
             });
@@ -52,7 +98,7 @@
 
 
             // Build the page's content
-            Object.keys(json[Object.keys(json)[0]]).forEach(section => { // Build all the grouped lists within the first category
+            Object.keys(json[currentSection]).forEach(section => { // Build all the grouped lists within the first category
                 // Create the section's div element
                 var sectionDiv = createElement('div', [['class', 'grouped list']]);
 
@@ -66,7 +112,7 @@
                 var sectionList = createElement('ul');
 
                 // Create the section's list elements
-                json[Object.keys(json)[0]][section].forEach(element => {
+                json[currentSection][section].forEach(element => {
                     // Create the element's superficial attributes
                     let elementAttributes;
                     let elementValueAccompaniment;
@@ -115,6 +161,9 @@
                             break;
                     }
 
+                    // Update the segment controller
+                    updateSegmentedControl('updateActive', document.querySelector(`.seg-control-item:nth-child(${Object.keys(json).indexOf(currentSection) + 1})`));
+
                     // Create the list item
                     elementListItem = createElement('li', elementAttributes);
 
@@ -141,14 +190,9 @@
             })
 
             // Add the Create Button
-            var createButton = createElement('button', [['type', 'button'], ['onclick', `createNew({
-            'name': document.querySelector('#taskName.value').value,
-            'description': document.querySelector('#taskDescription.value').value,
-            'type': document.querySelector('select#taskType').value,
-            'list': document.querySelector('select#taskList').value
-        }, {
+            var createButton = createElement('button', [['type', 'button'], ['onclick', `createNew(${callback}, {
             'caller': this
-        })`], ['class', 'attention-button inline'], ['id', 'new-task-button']], '<p>Create New Task</p>');
+        })`], ['class', 'attention-button inline'], ['id', 'new-task-button']], '<p>Create</p>');
 
             // Append the button to the section
             document.querySelector('section#new').appendChild(createButton);
@@ -163,8 +207,6 @@
         async function setTaskListsDropdown() {
             var taskLists = await fetchFromCategory('tasks', undefined, undefined, true, true);
             var listDropdowns = document.querySelector('select#taskList');
-            console.log(listDropdowns);
-            console.log(taskLists);
             listDropdowns.innerHTML = '';
             taskLists.forEach(list => {
                 var option = document.createElement('option');

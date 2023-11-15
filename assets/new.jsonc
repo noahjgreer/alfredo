@@ -1,6 +1,12 @@
 {
     // These first parent objects are the main categories
     "Task": {
+        "callback": {
+            "name": "document.querySelector('#taskName.value').value",
+            "description": "document.querySelector('#taskDescription.value').value",
+            "type": "document.querySelector('select#taskType').value",
+            "list": "document.querySelector('select#taskList').value"
+        },
         // These are the subsections for the user to fill out.
         // The key's name will be displayed as a header
         "Task Information": [
@@ -42,7 +48,23 @@
         ]
     },
     "List": {
-
+        "callback": {
+            "type": "'list'",
+            "name": "document.querySelector('#listName.value').value",
+            "icon": "document.querySelector('#listIcon.value').value"
+        },
+        "List Information": [
+            {
+                "name": "List Title",
+                "type": "textInput",
+                "id": "listName"
+            },
+            {
+                "name": "List Icon",
+                "type": "textInput",
+                "id": "listIcon"
+            }
+        ]
     },
     "Integration": {
 

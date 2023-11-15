@@ -283,6 +283,8 @@ async function loadSection(section, args) {
  * @returns {void}
  */
 async function updateTasks(tasks, isLists, taskBody) {
+    // Create a variable for the list ID
+    let list = taskBody.parentElement.id.split('-')[1];
     // Check if the inputed array "tasks" is a list of tasks, or a list of lists. 
     // If it is a list of lists, then the isLists parameter should be true.
     if (isLists) {
@@ -334,40 +336,44 @@ async function updateTasks(tasks, isLists, taskBody) {
         tasklist.innerHTML = '';
         let taskElement;
         // Loop through the provided tasks array, if it contains items
+
+        if (tasks.tasks.length != 0) {
+            tasks.tasks.forEach(element => {
+                var taskElementBase = 'task';
+                taskElement = document.createElement('div');
+                taskElement.classList.add('task');
+                taskElement.id = element.id;
+                taskElement.innerHTML = `
+            <a class="check" onclick="markTaskComplete('${element.id}')"></a>
+            <div class="task-content">
+                <p>${element.name}</p>
+                <h3>${element.description}</h3>
+            </div>
+                `;
+                tasklist.appendChild(taskElement);
+                var taskElementArgs = {
+                parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
+                id: element.id,
+                };
+                // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
+            });    
+        } else {
+        // Set a motivational quote on the page instead
+        if (JSON.parse(localStorage.getItem('settings')).motivation) {
+            var bibleMotivation = await getMotivation();
+            tasklist.innerHTML = `
+            <p class="subtle">You're all caught up! <br><br> ${bibleMotivation}</p>
+            `;
+        } else {
+            tasklist.innerHTML = `
+            <p class="subtle">You're all caught up!</p>
+            `;
+        }
+        }
+
+        /*
         if (taskBody.parentElement.id != 'tasklist-all') {
-            if (tasks.tasks.length != 0) {
-                tasks.tasks.forEach(element => {
-                    var taskElementBase = 'task';
-                    taskElement = document.createElement('div');
-                    taskElement.classList.add('task');
-                    taskElement.id = element.id;
-                    taskElement.innerHTML = `
-                <a class="check" onclick="markTaskComplete('${element.id}')"></a>
-                <div class="task-content">
-                    <p>${element.name}</p>
-                    <h3>${element.description}</h3>
-                </div>
-                    `;
-                    tasklist.appendChild(taskElement);
-                    var taskElementArgs = {
-                    parentSection: grabElementAsSelector(document.querySelector(grabClassesAsSelector(taskElement)).closest('section')),
-                    id: element.id,
-                    };
-                    // taskElement.setAttribute('onclick', `loadPage('${taskElementBase}', ${JSON.stringify(taskElementArgs)}, false)`);
-                });    
-            } else {
-            // Set a motivational quote on the page instead
-            if (JSON.parse(localStorage.getItem('settings')).motivation) {
-                var bibleMotivation = await getMotivation();
-                tasklist.innerHTML = `
-                <p class="subtle">You're all caught up! <br><br> ${bibleMotivation}</p>
-                `;
-            } else {
-                tasklist.innerHTML = `
-                <p class="subtle">You're all caught up!</p>
-                `;
-            }
-            }
+            
         } else {
             if (tasks.lists.length != 0) {
                 tasks.lists.forEach(element => {
@@ -404,7 +410,7 @@ async function updateTasks(tasks, isLists, taskBody) {
                     `;
                 }
             }
-        }
+        }*/
         // console.log(tasklist);
     }
 }
@@ -432,7 +438,6 @@ async function createNew(passObject, referenceData) {
             }
         });
     }
-    console.log(caller);
 
     // Check Object Type
     switch (passObject.type.toLowerCase()) {
@@ -491,10 +496,71 @@ async function createNew(passObject, referenceData) {
                         caller.innerHTML = caller.previousInnerHTML;
                     }, 5000);
                 }
-                console.log(data);
                 if (data.response) {
                     // If the task was created successfully, fetch the new task list
                     fetchFromCategory('tasks', undefined, document.querySelector('#tasks .tasklist'), true);
+                }
+            });
+            break;
+        case 'list':
+            // Handle Missing Fields
+            if (!passObject.name) {
+                callAlert('Missing Field', 'Please enter a name for your list.');
+                return;
+            }
+
+            // Update the Button Text (if valid)
+            if (caller) {
+                caller.previousInnerHTML = caller.innerHTML;
+                caller.previousBGC = caller.style.backgroundColor;
+                caller.innerHTML = `<img src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem" class="loading-wheel">`;
+                caller.classList.toggle('processing');
+            }
+
+            // Tell the server to create a new task
+            await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    purpose: "createNew",
+                    token: localStorage.getItem('token'),
+                    object: passObject
+                })
+            }).then(response => {
+                if (!response.ok) {
+                    switch (response.status) {
+                        case 401:
+                            callAlert('Verification Failed', "Your authentication token is invalid. You will now return to the login page", function () {
+                                window.location.href = 'index.html';
+                            });
+                            console.log(response);
+                    }
+                }
+                return response.json();
+            }).then(data => {
+                // Update the Button Text (if valid)
+                if (caller) {
+                    // Store the old onclick method
+                    caller.previousOnClick = caller.getAttribute('onclick');
+                    
+                    // Set the background color to green and the text to "Created!"
+                    caller.classList.toggle('processing');
+                    caller.style.backgroundColor = '#34C759';
+                    caller.setAttribute('onclick', `loadSection('tasks')`);
+                    caller.innerHTML = '<p>Created! <img src="assets/icons/arrow.up.forward.square.svg" alt="View Task in List" class="icon-inline semi-big" color-filter="white"></p>';
+                    setTimeout(() => {
+                        // Reset the background color and text after 5 seconds
+                        caller.setAttribute('onclick', caller.previousOnClick);
+                        caller.style.backgroundColor = caller.previousBGC;
+                        caller.innerHTML = caller.previousInnerHTML;
+                    }, 5000);
+                }
+                console.log(data);
+                if (data.response) {
+                    // If the task was created successfully, fetch the new task list
+                    fetchFromCategory('tasks');
                 }
             });
             break;
@@ -516,16 +582,16 @@ async function createNew(passObject, referenceData) {
  */
 async function fetchFromCategory(category, list, taskBody, isLists, returnData) {
     let listCopy = list;
-    let taskBodyCopy = taskBody;
+    let taskBodyCopy = taskBody || null;
 
     switch (category) {
         case 'tasks':
-            if (!returnData && (!window.location.search == '?tab=new')) {
+            if (!returnData && (window.location.search != '?tab=new')) {
                 taskBody ? taskBody : taskBody = document.querySelector('#tasks .tasklist');
                 taskBody.id = "lists";
-                taskBody.innerHTML = `
-                <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
-                `;
+                // taskBody.innerHTML = `
+                // <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
+                // `;
             }
             return await simpleFetch({
                 purpose: "fetchTasks",
@@ -544,45 +610,56 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                     cacheKeyHandler('set', category, data.cacheKey);
                     cacheDatabaseHandler('set', category, data.response);
                 }
-
                 cacheDatabaseHandler('get');
+
                 // dataResponse = fetchedCategories.tasks;
                 dataResponse = parseDatabaseToFormat('listsFull', 'tasks');
 
 
                 // Parse the data response
-                if (listCopy) {
-                    isListsArray = false;
-                    // dataResponse.all.lists.forEach(element => {
-                    //     if (element.properties.id == list) {
-                    //         parsedDataResponse = element;
-                    //     }
-                    // });
-                    dataResponse.forEach(element => {
-                        if (element.properties.id == list) {
-                            parsedDataResponse = element;
-                        }
-                    });
-                } else { // If no list is specified, then the response is all lists
-                    isListsArray = true;
+                // Check if we only want to return data:
+                if (returnData) {
                     parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
-                }
-
-                /*if (list == undefined) {
-                    fetchedCategories.tasks = dataResponse.tasks;
-                } else {
-                    if (fetchedCategories.tasks.lists) {
-                        fetchedCategories.tasks.lists.forEach(element => {
-                            if (element.id == list[0]) {
-                                element.tasks = data.response.tasks;
-                            }
-                        });
-                    }
-                }*/
-                if (!returnData) {
-                    updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
-                } else {
                     return parsedDataResponse;
+                } else {
+                    if (taskBodyCopy.parentElement.id.split('-')[1] == 'all') {
+                        isListsArray = false;
+                        parsedDataResponse = parseDatabaseToFormat('allTasks', 'tasks');
+                    } else {
+                        if (listCopy) {
+                            isListsArray = false;
+                            // dataResponse.all.lists.forEach(element => {
+                            //     if (element.properties.id == list) {
+                            //         parsedDataResponse = element;
+                            //     }
+                            // });
+                            dataResponse.forEach(element => {
+                                if (element.properties.id == list) {
+                                    parsedDataResponse = element;
+                                }
+                            });
+                        } else { // If no list is specified, then the response is all lists
+                            isListsArray = true;
+                            parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
+                        }
+                    }
+
+                    /*if (list == undefined) {
+                        fetchedCategories.tasks = dataResponse.tasks;
+                    } else {
+                        if (fetchedCategories.tasks.lists) {
+                            fetchedCategories.tasks.lists.forEach(element => {
+                                if (element.id == list[0]) {
+                                    element.tasks = data.response.tasks;
+                                }
+                            });
+                        }
+                    }*/
+                    if (!returnData) {
+                        updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
+                    } else {
+                        return parsedDataResponse;
+                    }
                 }
             });
             /*
@@ -687,7 +764,7 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
 
 async function markTaskComplete(taskID) {
     // Tell the console that markTaskComplete has been called
-    console.trace("markTaskComplete called" + taskID);
+    // console.trace("markTaskComplete called" + taskID);
     // Validate the taskID based on its type
     if (typeof taskID != 'string') {
         console.error('Invalid taskID');
@@ -700,13 +777,19 @@ async function markTaskComplete(taskID) {
             taskID: taskID
         }).then(data => {
             if (data) {
-                console.info(data);
                 var taskParent = data.response.taskParent;
+                var taskElementParent = document.querySelector(`#${taskID}`).parentElement;
                 var wasPreviouslyCompleted = data.response.wasPreviouslyCompleted;
+                // Check if the currently opened tasklist is the "all" list
+                if (taskElementParent.parentElement.id == 'tasklist-all') {
+                    return fetchFromCategory('tasks', 'all', document.querySelector('#tasklist-all>.tasklist'), false);
+                }
+
+                // Check if the task was previously completed
                 if (!wasPreviouslyCompleted) {
-                    fetchFromCategory('tasks', taskParent, document.querySelector(`#tasklist-${taskParent}>.tasklist`), false);
+                    return fetchFromCategory('tasks', taskParent, document.querySelector(`#tasklist-${taskParent}>.tasklist`), false);
                 } else {
-                    fetchFromCategory('tasks', 'completed', document.querySelector(`#tasklist-completed>.tasklist`), false);
+                    return fetchFromCategory('tasks', 'completed', document.querySelector(`#tasklist-completed>.tasklist`), false);
                     // document.querySelector(`#${taskID}`).remove();
                 }
             }

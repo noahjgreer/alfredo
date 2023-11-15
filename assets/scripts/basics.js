@@ -77,9 +77,9 @@ function updateSegmentedControl(call, element) {
     switch (call) {
         case 'init':
             // Set Default Active
-            document.querySelectorAll('.seg-control').forEach(element => {
-                element.querySelector('.seg-control-item:not(.seg-control-spacer)').classList.add('active');
-            });
+            // document.querySelectorAll('.seg-control').forEach(element => {
+            //     element.querySelector('.seg-control-item:not(.seg-control-spacer)').classList.add('active');
+            // });
 
             // Segment Control Spacers
             document.querySelectorAll('.seg-control').forEach(element => {
@@ -133,7 +133,7 @@ function updateSegmentedControl(call, element) {
  * Updates the URL parameters based on the provided method and object.
  *
  * @param {string} method - The method to use for updating the URL parameters. 
- *                          This can be "add", "set", "reset", or "remove".
+ *                          This can be "add", "set", "get", "reset", or "remove".
  * @param {(string|Object)} object - The object to use for updating the URL parameters. 
  *                                   If a string is provided, it should be in the format "key=value".
  *                                   If an object is provided, it should be in the format {key: value}.
@@ -176,6 +176,8 @@ function updateURLParams(method, object) {
             URLparams = {};
             URLobjectHandler(object);
             break;
+        case "get":
+            return URLparams;
         case "reset":
             URLparams = {};
             break;
@@ -583,7 +585,6 @@ function intervalLoop() {
 
 // Load Pages
 async function loadPage(page, args, isCache) {
-    console.log(args);
 
     // Check for Arguments
     if (!args) args = "";
@@ -618,7 +619,6 @@ async function loadPage(page, args, isCache) {
         subBody.setAttribute('id', page + "-" + pageArgs.id);
         subBody.setAttribute('class', 'sub-body');
         subBody.innerHTML = fetchedHTML.querySelector('body').innerHTML;
-        console.log(subBody); 
         // window.args = args;
         fetchFromCategory('tasks', pageArgs.id, subBody.querySelector('.tasklist'), false);
         if (page == 'tasklist' && isCache) {
@@ -726,6 +726,24 @@ function parseDatabaseToFormat(format, category) {
             });
             // Finally, push the completed tasks list
             response.push(fetchedCategories[category].completed);
+            return response;
+        case 'allTasks':
+            response = {
+                properties: [],
+                tasks: []
+            };
+            // Push the all tasklist properties to the response array
+            response.properties = fetchedCategories[category].all.properties;
+            // Push all tasks from the ALL tasklist to the array
+            fetchedCategories[category].all.lists.forEach(list => {
+                list.tasks.forEach(task => {
+                    response.tasks.push(task);
+                });
+            });
+            // Push all tasks from Completed list to the array
+            // fetchedCategories[category].completed.tasks.forEach(task => {
+            //     response.tasks.push(task);
+            // });
             return response;
         default:
             console.error('Invalid format of: "' + format + '"');
