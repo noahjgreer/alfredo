@@ -237,7 +237,7 @@ function updateURLParams(method, object) {
  */
 function updateSectionParamsCache(section) {
     sectionParamsCache[section] = window.location.search + window.location.hash;
-    sessionStorage.setItem('sectionParamsCache', JSON.stringify(sectionParamsCache));
+    localStorage.setItem('sectionParamsCache', JSON.stringify(sectionParamsCache));
 }
 
 // Refresh the URLparams object every second

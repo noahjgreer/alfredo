@@ -16,9 +16,9 @@
             "section": "new"
         },         
         {
-            "name": "Routine",
+            "name": "Routines",
             "icon": "/assets/icons/clock.svg",
-            "section": "routine"
+            "section": "routines"
         },
         {
             "name": "Settings",

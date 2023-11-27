@@ -3,7 +3,7 @@ let defaultSection = 'tasks';
 let firstPageLoad = true;
 let baseThemeColor = document.querySelector('meta[name="theme-color"]');
 let sectionScripts = document.querySelectorAll('.section-script');
-let sectionParamsCache = sessionStorage.getItem('sectionParams') ? JSON.parse(sessionStorage.getItem('sectionParams')) : {};
+let sectionParamsCache = localStorage.getItem('sectionParams') ? JSON.parse(localStorage.getItem('sectionParams')) : {};
 let fetchedCategories = {
     tasks: {},
     routines: {},
@@ -175,7 +175,8 @@ async function loadSection(section, args) {
     
     if (firstPageLoad) {
         // Clear URL Params on first page load to prevent unsolved errors.
-        updateURLParams('reset');
+        // updateURLParams('reset');
+        
         // Check for Token and other User Attributes
         await validateUserDataPresence();
     }
@@ -199,10 +200,11 @@ async function loadSection(section, args) {
     } else {
         updateURLParams('set', ['tab', section]);
     }
-    // updateURLParams('set', ['tab', section]);
+    // Clear the sub-body elements, aka the sub pages
     document.querySelectorAll('.sub-body').forEach(element => {
         element.remove();
     });
+    
     let content = document.querySelector('section');
     if (section == content.getAttribute('id')) return;        
     let fetchedHTML = document.createElement('html');
@@ -221,6 +223,8 @@ async function loadSection(section, args) {
     content.setAttribute('id', section);
 
     content.innerHTML = '';
+    console.log(section);
+    console.log(newArgs);
     var taskBody = await fetch(`/sections/${section}.html`)
     .then(response => {
         if (!response.ok) {
@@ -262,14 +266,14 @@ async function loadSection(section, args) {
         if (listableSections.includes(section)) {
             let taskBody = document.querySelector('#tasks .tasklist'); // Get the taskBody element
             taskBody.id = "lists";
-            fetchFromCategory('tasks', undefined, taskBody, true);
+            fetchFromCategory(section, undefined, taskBody, true);
             return taskBody;
         }
     }).catch(error => {
         if (error == "Error: 404") {
             callAlert('404: Page Not Found', 'The requested section was not found. Please try again.');
         }
-        console.log(error);
+        console.error(error);
         content.innerHTML = '<h1>404</h1>';
     });
     return taskBody;
@@ -584,8 +588,88 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
     let listCopy = list;
     let taskBodyCopy = taskBody || null;
 
+    if (!returnData && (window.location.search != '?tab=new')) {
+        taskBody ? taskBody : taskBody = document.querySelector('#tasks .tasklist');
+        taskBody.id = "lists";
+        // taskBody.innerHTML = `
+        // <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
+        // `;
+    }
+    return await simpleFetch({
+        purpose: "fetchTasks",
+        token: localStorage.getItem('token'),
+        list: list,
+        category: category,
+        cacheKey: cacheKeyHandler('get', category)
+    }).then(data => {
+        let isListsArray;
+        let dataResponse;
+        let parsedDataResponse = [];
+        // console.log(category, listCopy, taskBody, isLists, data.response);
+
+        // Update the cache key and determine the data response
+        if (data.cacheKey != cacheKeyHandler('get', category) && data.cacheKey != undefined) {
+            cacheKeyHandler('set', category, data.cacheKey);
+            cacheDatabaseHandler('set', category, data.response);
+        }
+        cacheDatabaseHandler('get');
+
+        // dataResponse = fetchedCategories.tasks;
+        dataResponse = parseDatabaseToFormat('listsFull', 'tasks');
+
+
+        // Parse the data response
+        // Check if we only want to return data:
+        if (returnData) {
+            parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
+            return parsedDataResponse;
+        } else {
+            if (taskBodyCopy.parentElement.id.split('-')[1] == 'all') {
+                isListsArray = false;
+                parsedDataResponse = parseDatabaseToFormat('allTasks', 'tasks');
+            } else {
+                if (listCopy) {
+                    isListsArray = false;
+                    // dataResponse.all.lists.forEach(element => {
+                    //     if (element.properties.id == list) {
+                    //         parsedDataResponse = element;
+                    //     }
+                    // });
+                    dataResponse.forEach(element => {
+                        if (element.properties.id == list) {
+                            parsedDataResponse = element;
+                        }
+                    });
+                } else { // If no list is specified, then the response is all lists
+                    isListsArray = true;
+                    parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
+                }
+            }
+
+            /*if (list == undefined) {
+                fetchedCategories.tasks = dataResponse.tasks;
+            } else {
+                if (fetchedCategories.tasks.lists) {
+                    fetchedCategories.tasks.lists.forEach(element => {
+                        if (element.id == list[0]) {
+                            element.tasks = data.response.tasks;
+                        }
+                    });
+                }
+            }*/
+            if (!returnData) {
+                updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
+            } else {
+                return parsedDataResponse;
+            }
+        }
+    });
+    /*
     switch (category) {
         case 'tasks':
+            
+            break;
+        case 'routines':
             if (!returnData && (window.location.search != '?tab=new')) {
                 taskBody ? taskBody : taskBody = document.querySelector('#tasks .tasklist');
                 taskBody.id = "lists";
@@ -654,7 +738,7 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                                 }
                             });
                         }
-                    }*/
+                    }
                     if (!returnData) {
                         updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
                     } else {
@@ -662,94 +746,6 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                     }
                 }
             });
-            /*
-            return await fetch(`https://${localStorage.getItem('fetchLoc')}:3001/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    purpose: "fetchTasks",
-                    token: localStorage.getItem('token'),
-                    list: list,
-                    category: category,
-                    cacheKey: cacheKeyHandler('get', category)
-                })
-            }).then(response => {
-                if (!response.ok) {
-                    switch (response.status) {
-                        case 401:
-                            callAlert('Verification Failed', "Your authentication token is invalid. You will now return to the login page", function () {
-                                window.location.href = 'index.html';
-                            });
-                            console.log(response);
-                            break;
-                        default:
-                            callAlert('An Error Occurred: ' + response.status, "While fetching your tasks, the server sent back a bad response: " + response.statusText);
-                    }
-                }
-                return response.json();
-            }).then(data => {
-                let isListsArray;
-                let dataResponse;
-                let parsedDataResponse = [];
-                // console.log(category, listCopy, taskBody, isLists, data.response);
-
-                // Update the cache key and determine the data response
-                if (data.cacheKey != cacheKeyHandler('get', category) && data.cacheKey != undefined) {
-                    cacheKeyHandler('set', category, data.cacheKey);
-                    cacheDatabaseHandler('set', category, data.response);
-                    console.log(dataResponse);
-                }
-
-                cacheDatabaseHandler('get');
-                // dataResponse = fetchedCategories.tasks;
-                dataResponse = parseDatabaseToFormat('listsFull', 'tasks');
-
-
-                // Parse the data response
-                if (listCopy) {
-                    isListsArray = false;
-                    // dataResponse.all.lists.forEach(element => {
-                    //     if (element.properties.id == list) {
-                    //         parsedDataResponse = element;
-                    //     }
-                    // });
-                    dataResponse.forEach(element => {
-                        if (element.properties.id == list) {
-                            parsedDataResponse = element;
-                        }
-                    });
-                    console.log("is a list");
-                } else { // If no list is specified, then the response is all lists
-                    isListsArray = true;
-                    parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
-                }
-
-                /*if (list == undefined) {
-                    fetchedCategories.tasks = dataResponse.tasks;
-                } else {
-                    if (fetchedCategories.tasks.lists) {
-                        fetchedCategories.tasks.lists.forEach(element => {
-                            if (element.id == list[0]) {
-                                element.tasks = data.response.tasks;
-                            }
-                        });
-                    }
-                }
-                if (!returnData) {
-                    console.log(parsedDataResponse);
-                    updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
-                } else {
-                    return parsedDataResponse;
-                }
-            });*/
-            // .catch(err => {
-            //     callAlert('An Error Occurred', "While fetching your tasks, the server sent back an error: " + err, window.location.href = 'index.html');
-            // })    
-            break;
-        case 'routines':
-            await fetchRoutines(list, taskBody);
             break;
         case 'events':
             await fetchEvents(list, taskBody);
@@ -759,7 +755,7 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
             break;
     }
     if (!list) {
-    }
+    }*/
 }
 
 async function markTaskComplete(taskID) {
