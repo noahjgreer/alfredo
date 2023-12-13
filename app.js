@@ -21,16 +21,40 @@ app.use(express.json());
 //app.use(bodyParser.urlencoded({extended: false}));
 
 app.get('/', (req, res) => {
-    console.log("Recieved a Get Request. This is unusual! " + req.ip + " " + req.get('User-Agent') + " " + new Date().toISOString());
+    // A get request was recieved, log it to the console for fun
+    console.log("Recieved a Get Request. This is unusual! " + req.ip + " " + req.get('User-Agent') + " " + new Date().toISOString() + " " + JSON.stringify(req.body));
+    // Set the response headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, token');
-    res.write('Christ is my firm foundation.');
-    res.end();
-    if (req.method.toLowerCase() == 'options') {
-        res.writeHead(200);
+    // Check if the URL has a query string attached to it
+    if (req.query == {}) {
+        // No query found, this is an invalid request
+        console.error("Invalid request!");
+        res.status(400).json({
+            response: "Invalid request!",
+        });
     }
+    // Check for token in the headers
+    if (req.headers.authorization == undefined) {
+        // No token found, this is an invalid request
+        console.error("No authorization found!");
+        res.status(401).json({
+            response: "No authorization found!",
+        });
+    } else {
+        console.log("Authorization found! " + req.headers.authorization);
+    }
+    // res.write('Christ is my firm foundation.');
+    // res.end();
+    // if (req.method.toLowerCase() == 'options') {
+    //     res.writeHead(200);
+    // }
 })
+
+app.options('*', (req, res) => {
+    res.status(200).end();
+});
 
 app.post('/', async (req, res) => {
     try {
@@ -39,6 +63,12 @@ app.post('/', async (req, res) => {
             ["Request", "Purpose", "Date", "IP Address", "Token", "User Agent"],
             [req.method || "undefined", req.body.purpose || "undefined", new Date().toISOString(), req.ip || "undefined", req.body.token || "undefined", req.get('User-Agent') || "undefined"]
         ]);
+        console.log(req.body)
+        if (!req.body || !req.body.purpose || req.body == undefined || req.body == {}) {
+            return res.status(400).json({
+                response: "No body!",
+            });
+        }
         switch (req.body.purpose) {
             case "login":
                 await credentialHandler(req.body.name, req.body.pass).then(data => {
@@ -216,13 +246,14 @@ async function createNew(body) {
     // Validate Object
     if (object == undefined) {
         throw new Error("Object is undefined!");
-    } else if (!object.type) {
-        throw new Error("Object type is undefined!");
-    } else if (!object.name) {
-        throw new Error("Object name is undefined!");
-    } else if (!object.list) {
-        throw new Error("Object list is undefined!");
-    }
+    } 
+    // else if (!object.type) {
+    //     throw new Error("Object type is undefined!");
+    // } else if (!object.name) {
+    //     throw new Error("Object name is undefined!");
+    // } else if (!object.list) {
+    //     throw new Error("Object list is undefined!");
+    // }
 
 
     switch (object.type.toLowerCase()) {
@@ -272,6 +303,48 @@ async function createNew(body) {
             }).catch(err => {
                 throw new Error(err);
             })
+            break;
+        case "list":
+            console.info("Creating a new list!");
+
+            // Create a new list
+            var list = {
+                "properties": {
+                    "color": object.color || "#000000",
+                    "icon": object.icon || "noodle",
+                    "id": identifierGen("list"),
+                    "name": object.name,
+                },
+                "tasks": [],
+            }
+
+            // Grab the user's task file
+            var taskDir = "F:/web-private/alfredo/lists/" + uuid + "/tasks.json";
+            return fsp.readFile(taskDir, 'utf8').then((taskFile) => {
+                var taskFileJSON = JSON.parse(taskFile);
+                var allTasks = taskFileJSON.all.lists;
+
+                // Add the list to the taskFileJSON
+                allTasks.push(list);
+
+                // Update the taskFileJSON
+                taskFileJSON.all.lists = allTasks;
+
+                // Update the user's cacheKey
+                taskFileJSON.cacheKey = identifierGen("ck");
+
+                // Write the changes to the file
+                taskFileJSON = JSON.stringify(taskFileJSON, null, 4);
+                fs.writeFile(taskDir, taskFileJSON, (err) => {
+                    if (err) console.error(err);
+                });
+                console.info("List created!");
+
+                return [list.properties.id, taskFileJSON.cacheKey];
+            }).catch(err => {
+                throw new Error(err);
+            })
+            break;
     }
 }
 
@@ -653,7 +726,7 @@ async function fetchCategory(reqBody) {
                 fs.writeFile(catDir, tasklistNew, (err) => {
                     if (err) console.error(err);
                 });
-                return fetchCategory(token, list);
+                return fetchCategory(token);
             } else {
                 console.log(err);
             }
@@ -745,8 +818,8 @@ function identifierGen(type, length, numOnly) {
 // Server Starting
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer({
-    key: fs.readFileSync("Z:/Web/MuffinMode/certificates/alfredo/privkey1.pem"),
-    cert: fs.readFileSync("Z:/Web/MuffinMode/certificates/alfredo/fullchain1.pem"),
+    key: fs.readFileSync("F:/MuffinMode/certificates/oct2023/server.key"),
+    cert: fs.readFileSync("F:/MuffinMode/certificates/oct2023/muffinmode_net.crt")
     // key: fs.readFileSync("F:/web-private/cert/CA/localhost/localhost.decrypted.key"),
     // cert: fs.readFileSync("F:/web-private/cert/CA/localhost/localhost.crt"),
 }, app);
@@ -759,4 +832,13 @@ httpsServer.listen(httpsPort, () => {
     console.log('HTTPS server running on port ' + httpsPort);
     
     //startupScript();
+});
+
+var cors_proxy = require('cors-anywhere');
+cors_proxy.createServer({
+    originWhitelist: [], // Allow all origins
+    requireHeader: ['origin', 'x-requested-with'],
+    removeHeaders: ['cookie', 'cookie2']
+}).listen(3002, 'localhost', function() {
+    console.log('Running CORS Anywhere on localhost:3002');
 });
