@@ -319,7 +319,7 @@ async function createNew(body) {
             }
 
             // Grab the user's task file
-            var taskDir = "F:/web-private/alfredo/lists/" + uuid + "/tasks.json";
+            var taskDir = "F:/web-private/alfredo/lists/" + uuid + `/${object.listType.toLowerCase()}.json`;
             return fsp.readFile(taskDir, 'utf8').then((taskFile) => {
                 var taskFileJSON = JSON.parse(taskFile);
                 var allTasks = taskFileJSON.all.lists;
@@ -671,6 +671,10 @@ async function fetchCategory(reqBody) {
                 // Create the User's Tasklist Directory
                 catDir = "F:/web-private/alfredo/lists/" + uuid + "/tasks.json";
                 break;
+            case "routines":
+                // Create the User's Tasklist Directory
+                catDir = "F:/web-private/alfredo/lists/" + uuid + "/routines.json";
+                break;
             default:
                 throw new Error("Invalid category of: " + category);
         }
@@ -719,7 +723,7 @@ async function fetchCategory(reqBody) {
                             "icon": "noodle",
                             "color": "#000000"
                         },
-                        "lists": {}
+                        "lists": []
                     }
                 }
                 tasklistNew = JSON.stringify(tasklistNew, null, 4);
@@ -732,7 +736,7 @@ async function fetchCategory(reqBody) {
             }
         })
     } else {
-        console.log("Invalid token! at fetchTasks");
+        console.trace("Invalid token! at fetchTasks");
         throw new Error("Invalid token!");
     }
 }
@@ -825,7 +829,7 @@ const httpsServer = https.createServer({
 }, app);
 
 httpServer.listen(port, () => {
-    console.log('HTTP server running on port ' + port);
+    console.log('HTTP server run=ning on port ' + port);
 });
 
 httpsServer.listen(httpsPort, () => {
