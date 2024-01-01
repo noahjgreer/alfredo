@@ -36,7 +36,8 @@ if (localStorage.getItem('token')) {
         fetch(`https://${fetchLoc}:3001/`, {
             method: "POST",
             headers: {
-                'Content-Type': "application/json"
+                'Content-Type': "application/json",
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
             },
             body: JSON.stringify({
                 purpose: "verifyCache",
@@ -128,7 +129,8 @@ function callLogin() {
             signal: abortController.signal,
             method: "POST",
             headers: {
-                'Content-Type': "application/json"
+                'Content-Type': "application/json",
+                'Authorization': 'Basic ' + btoa(userID + ':' + passID)
             },
             body: JSON.stringify({
                 purpose: "login",

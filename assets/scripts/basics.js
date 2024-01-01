@@ -17,6 +17,37 @@ const documentHeight = function () {
 // Get URL Search Params and link them to the search bar's parameters
 var URLparams = {};
 
+async function sendGetRequest(object) {
+    // Since we can't pass a body into the GET request, we have to send the object as a query string
+    // This is done by converting the object into a query string, and then appending it to the URL
+    var queryString = '';
+    Object.keys(object).forEach(element => {
+        queryString += `${element}=${object[element]}&`;
+    });
+    // Remove the last & from the query string
+    queryString = queryString.slice(0, -1);
+
+    // Set the URL to the new URL with the query string
+    var url = `https://${localStorage.getItem('fetchLoc')}:3001/?${queryString}`;
+
+    return await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': localStorage.getItem('token')
+        }
+    }).then(response => {
+        responseHandler(response);
+
+        return response.json();
+    }).then(data => {
+        return data;
+    }).catch(error => {
+        console.error(error);
+    });
+}
+
+
 function updateURLParamsObject() {
     if (!window.location.search == '') {
         window.location.search.replace('?', '').split('&').forEach(element => {
@@ -236,7 +267,15 @@ function updateURLParams(method, object) {
  * @param {string} section - The name of the section for which to update the parameters cache to.
  */
 function updateSectionParamsCache(section) {
-    sectionParamsCache[section] = window.location.search + window.location.hash;
+    let windowLocationSearchFormatted = window.location.search.split('&');
+    for (let i = 0; i < windowLocationSearchFormatted.length; i++) {
+        if (i == 0) {
+            windowLocationSearchFormatted[i] = "?tab=" + section;
+        }
+    }
+    // Merge each element in the windowLocationSearchFormatted array into one string
+    windowLocationSearchFormatted = windowLocationSearchFormatted.join('&');
+    sectionParamsCache[section] = windowLocationSearchFormatted + window.location.hash;
     localStorage.setItem('sectionParamsCache', JSON.stringify(sectionParamsCache));
 }
 
@@ -710,11 +749,19 @@ function parseDatabaseToFormat(format, category) {
             // Push the ALL tasklist to the array
             response.push(fetchedCategories[category].all.properties);
             // Push all other lists to the array
-            fetchedCategories[category].all.lists.forEach(list => {
-                response.push(list.properties);
-            });
-            // Finally, push the completed tasks list
-            response.push(fetchedCategories[category].completed.properties);
+            // First check if there are any lists
+            if (fetchedCategories[category].all.lists.length != 0 && fetchedCategories[category].all.lists.length != undefined) {
+                fetchedCategories[category].all.lists.forEach(list => {
+                    response.push(list.properties);
+                });
+            } else {
+                document.querySelector('.tasklist').innerHTML = `<p class="subtle">There are no lists in this category</p>`;
+                console.error('There are no lists in this category');
+            };
+            // Finally, push the completed tasks list, if it exists
+            if (fetchedCategories[category].completed) {
+                response.push(fetchedCategories[category].completed.properties);
+            }
             return response;
         case 'listsFull':
             response = [];

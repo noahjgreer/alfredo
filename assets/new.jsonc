@@ -50,10 +50,24 @@
     "List": {
         "callback": {
             "type": "'list'",
+            "listType": "document.querySelector('select#listType').value",
             "name": "document.querySelector('#listName.value').value",
             "icon": "document.querySelector('#listIcon.value').value"
         },
         "List Information": [
+            {
+                "name": "List Type",
+                "type": "dropdown",
+                "id": "listType",
+                "variable": false,
+                "options": [
+                    "Tasks",
+                    "Routines",
+                    "Events"
+                ]
+            }
+        ],
+        "": [
             {
                 "name": "List Title",
                 "type": "textInput",

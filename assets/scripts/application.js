@@ -264,7 +264,7 @@ async function loadSection(section, args) {
         }
         scrollabilityUpdate();
         if (listableSections.includes(section)) {
-            let taskBody = document.querySelector('#tasks .tasklist'); // Get the taskBody element
+            let taskBody = document.querySelector('.tasklist'); // Get the taskBody element
             taskBody.id = "lists";
             fetchFromCategory(section, undefined, taskBody, true);
             return taskBody;
@@ -293,7 +293,7 @@ async function updateTasks(tasks, isLists, taskBody) {
     // If it is a list of lists, then the isLists parameter should be true.
     if (isLists) {
         // Get the tasklist element
-        let tasklist = document.querySelector('#tasks .tasklist');
+        let tasklist = document.querySelector('.tasklist');
         // Clear the tasklist
         tasklist.innerHTML = '';
         // Create a variable for the task element
@@ -431,6 +431,8 @@ async function updateTasks(tasks, isLists, taskBody) {
 async function createNew(passObject, referenceData) {
     // Create Variables
     let caller;
+
+    console.log(passObject);
 
     // Map Reference Data
     if (referenceData) {
@@ -587,9 +589,11 @@ async function createNew(passObject, referenceData) {
 async function fetchFromCategory(category, list, taskBody, isLists, returnData) {
     let listCopy = list;
     let taskBodyCopy = taskBody || null;
+    let section = window.location.search.split('&')[0].split('=')[1];
 
     if (!returnData && (window.location.search != '?tab=new')) {
-        taskBody ? taskBody : taskBody = document.querySelector('#tasks .tasklist');
+        taskBody ? taskBody : taskBody = document.querySelector('.tasklist');
+        console.warn(taskBody);
         taskBody.id = "lists";
         // taskBody.innerHTML = `
         // <img class="loading-wheel" src="assets/icons/wheel2.svg" alt="Loading Wheel" style="width: 1.5rem">
@@ -642,7 +646,7 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                     });
                 } else { // If no list is specified, then the response is all lists
                     isListsArray = true;
-                    parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
+                    parsedDataResponse = parseDatabaseToFormat('lists', section);
                 }
             }
 
