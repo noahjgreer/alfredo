@@ -674,7 +674,7 @@ async function loadPage(page, args, isCache) {
         } else {
             subBody.querySelector('.section-header > .content > .left > h1').innerHTML = getNameFromTaskQuery(args.id, false); 
         }
-        subBody.querySelector(".section-header > .options > .left").insertBefore(createElement('a', [['class', 'back-button'], ['onclick', `closePage('${JSON.stringify(pageArgs)}')`]], `<img src="assets/icons/arrow.svg" alt="Back Button" style="width: 1.5rem" class="mirrored icon-inline"><label>${getNameFromTaskQuery(args.parentSection, true)}</label>`), subBody.querySelector(".section-header > .options > .left").firstChild);
+        subBody.querySelector(".section-header > .options > .left").insertBefore(createElement('a', [['class', 'back-button'], ['onclick', `closePage('${JSON.stringify(pageArgs)}')`]], `<img src="assets/icons/arrow.svg" alt="Back Button" class="mirrored icon-inline"><label>${getNameFromTaskQuery(args.parentSection, true)}</label>`), subBody.querySelector(".section-header > .options > .left").firstChild);
         document.body.appendChild(subBody);
         fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
         fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');

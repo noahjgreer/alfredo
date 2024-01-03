@@ -12,7 +12,7 @@
         },
         {
             "name": "New",
-            "icon": "/assets/icons/plus.svg",
+            "icon": "/assets/icons/plus.circle.svg",
             "section": "new"
         },         
         {
