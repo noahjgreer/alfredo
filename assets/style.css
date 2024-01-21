@@ -19,8 +19,8 @@ html {
 }
 
 body {
-  padding: 2.5rem 5%;
   margin: 0px;
+  padding-block: 2.5rem;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
@@ -105,6 +105,8 @@ section {
   flex-direction: column;
   align-items: center;
   margin-inline: 0px;
+  padding-inline: 5%;
+  box-sizing: border-box;
   width: 100%;
 }
 
@@ -200,7 +202,7 @@ section {
 }
 
 header {
-  background-color: rgba(255, 255, 255, 0.9333333333);
+  background-color: white;
   -webkit-backdrop-filter: blur(10px);
           backdrop-filter: blur(10px);
   justify-content: space-between;
@@ -359,8 +361,9 @@ footer a.selected img {
   overflow-x: hidden;
   background-color: white;
   padding: 2.5rem 5%;
-  height: calc(100% - 5rem);
-  width: 90%;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   top: 0%;
 }
 
@@ -904,6 +907,22 @@ p.subtle {
   }
   100% {
     background-color: initial;
+  }
+}
+@keyframes headerFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes headerFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 *:focus, *:hover, *:active, * {

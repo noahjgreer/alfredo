@@ -73,14 +73,12 @@ html {
 
 body {
     // margin: $body-standard-margin;
-    padding: $body-standard-margin;
     margin: 0px;
+    padding-block: $body-standard-margin-block;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
-    // min-height: 100%;
-    // height: 100%;
     flex: 1;
     // transition: background-color 0.1s ease-out;
 }
@@ -160,6 +158,8 @@ section {
     flex-direction: column;
     align-items: center;
     margin-inline: 0px;
+    padding-inline: $body-standard-margin-inline;
+    box-sizing: border-box;
     width: 100%;
 }
 
@@ -261,8 +261,9 @@ section {
 }
 
 header {
-    background-color: #ffffffee;
+    background-color: #ffffffff;
     backdrop-filter: $backdrop-blur;
+    // backdrop-filter: blur(0px);
     justify-content: space-between;
     border-bottom: 0.5px solid $input-span-color;
     height: 2.75rem;
@@ -432,8 +433,11 @@ footer {
     background-color: white;
     padding: $body-standard-margin;
     // padding-top: 0px;
-    height: calc(100% - (2 * $body-standard-margin-block));
-    width: calc(100% - ($body-standard-margin-inline * 2));
+    // height: calc(100% - (2 * $body-standard-margin-block));
+    // width: calc(100% - ($body-standard-margin-inline * 2));
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
     top: 0%;
 }
 
@@ -1012,6 +1016,24 @@ p.subtle {
     }
     100% {
         background-color: initial;
+    }
+}
+
+@keyframes headerFadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes headerFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
     }
 }
 

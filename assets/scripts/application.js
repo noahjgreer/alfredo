@@ -101,8 +101,6 @@ async function fetchFooterContent() {
     });
 }
 
-let header = document.querySelector('header');
-
 /**
  * A function which checks whether the element is in the viewport or not.
  *
@@ -340,6 +338,8 @@ async function updateTasks(tasks, isLists, taskBody) {
         tasklist.innerHTML = '';
         let taskElement;
         // Loop through the provided tasks array, if it contains items
+
+        console.log(tasks);
 
         if (tasks.tasks.length != 0) {
             tasks.tasks.forEach(element => {
@@ -619,18 +619,19 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
         cacheDatabaseHandler('get');
 
         // dataResponse = fetchedCategories.tasks;
-        dataResponse = parseDatabaseToFormat('listsFull', 'tasks');
+        dataResponse = parseDatabaseToFormat('listsFull', category);
 
+        console.log(dataResponse);
 
         // Parse the data response
         // Check if we only want to return data:
         if (returnData) {
-            parsedDataResponse = parseDatabaseToFormat('lists', 'tasks');
+            parsedDataResponse = parseDatabaseToFormat('lists', category);
             return parsedDataResponse;
         } else {
             if (taskBodyCopy.parentElement.id.split('-')[1] == 'all') {
                 isListsArray = false;
-                parsedDataResponse = parseDatabaseToFormat('allTasks', 'tasks');
+                parsedDataResponse = parseDatabaseToFormat('allTasks', category);
             } else {
                 if (listCopy) {
                     isListsArray = false;
@@ -639,9 +640,12 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                     //         parsedDataResponse = element;
                     //     }
                     // });
+                    console.log(dataResponse);
                     dataResponse.forEach(element => {
-                        if (element.properties.id == list) {
-                            parsedDataResponse = element;
+                        if (element != null) {
+                            if (element.properties.id == list) {
+                                parsedDataResponse = element;
+                            }
                         }
                     });
                 } else { // If no list is specified, then the response is all lists
@@ -661,6 +665,7 @@ async function fetchFromCategory(category, list, taskBody, isLists, returnData) 
                     });
                 }
             }*/
+
             if (!returnData) {
                 updateTasks(parsedDataResponse, isListsArray, taskBodyCopy);
             } else {

@@ -630,6 +630,7 @@ async function loadPage(page, args, isCache) {
     let pageID = 0;
     let pageArgs = args;
     pageArgs.page = page;
+    let category = args.parentSection.split('#')[1];
 
     // Check for existing open pages in the URL params, and then increment the page number to be one above the last page
     for (let i = 0; i < Object.keys(URLparams).length; i++) {
@@ -659,10 +660,10 @@ async function loadPage(page, args, isCache) {
         subBody.setAttribute('class', 'sub-body');
         subBody.innerHTML = fetchedHTML.querySelector('body').innerHTML;
         // window.args = args;
-        fetchFromCategory('tasks', pageArgs.id, subBody.querySelector('.tasklist'), false);
+        fetchFromCategory(category, pageArgs.id, subBody.querySelector('.tasklist'), false);
         if (page == 'tasklist' && isCache) {
-            if (Object.keys(fetchedCategories.tasks).length != 0) {
-                let fetchedTaskLists = parseDatabaseToFormat('lists', 'tasks');
+            if (Object.keys(fetchedCategories[category]).length != 0) {
+                let fetchedTaskLists = parseDatabaseToFormat('lists', category);
                 fetchedTaskLists.forEach(element => {
                     if (args.id == element.id) {
                         subBody.querySelector('.section-header > .content > .left > h1').innerHTML = element.name; 
@@ -672,9 +673,9 @@ async function loadPage(page, args, isCache) {
                 return null;
             }
         } else {
-            subBody.querySelector('.section-header > .content > .left > h1').innerHTML = getNameFromTaskQuery(args.id, false); 
+            subBody.querySelector('.section-header > .content > .left > h1').innerHTML = getNameFromTaskQuery(args.id, false, category); 
         }
-        subBody.querySelector(".section-header > .options > .left").insertBefore(createElement('a', [['class', 'back-button'], ['onclick', `closePage('${JSON.stringify(pageArgs)}')`]], `<img src="assets/icons/arrow.svg" alt="Back Button" class="mirrored icon-inline"><label>${getNameFromTaskQuery(args.parentSection, true)}</label>`), subBody.querySelector(".section-header > .options > .left").firstChild);
+        subBody.querySelector(".section-header > .options > .left").insertBefore(createElement('a', [['class', 'back-button'], ['onclick', `closePage('${JSON.stringify(pageArgs)}')`]], `<img src="assets/icons/arrow.svg" alt="Back Button" class="mirrored icon-inline"><label>${getNameFromTaskQuery(args.parentSection, true, category)}</label>`), subBody.querySelector(".section-header > .options > .left").firstChild);
         document.body.appendChild(subBody);
         fetchedHTML.querySelector('meta[name="theme-color"]') ? baseThemeColor.setAttribute('content', fetchedHTML.querySelector('meta[name="theme-color"]').getAttribute('content')) : null;
         fetchedHTML.querySelector('body').getAttribute('style') ? document.body.setAttribute('style', fetchedHTML.querySelector('body').getAttribute('style')) : document.body.removeAttribute('style');
@@ -721,7 +722,7 @@ function grabElementAsSelector(element) {
     return selector;
 }
 
-function getNameFromTaskQuery(query, isList) {
+function getNameFromTaskQuery(query, isList, category) {
     let taskName;
     if (isList) {
         // Lazy patch.
@@ -730,9 +731,8 @@ function getNameFromTaskQuery(query, isList) {
         } else {
             taskName = document.querySelector(`${query} > .section-header > .content > h1`).innerHTML;
         }
-
     } else {
-        parseDatabaseToFormat('lists', 'tasks').forEach(element => {
+        parseDatabaseToFormat('lists', category).forEach(element => {
             if (query == element.id) {
                 taskName = element.name;
             }
@@ -818,6 +818,21 @@ function switchToggle(element, event) {
     // console.log(event);
 }
 
+/**
+ * Returns a number whose value is limited to the given range.
+ *
+ * Example: limit the output of this computation to between 0 and 255
+ * (x * 255).clamp(0, 255)
+ *
+ * @param {Number} min The lower boundary of the output range
+ * @param {Number} max The upper boundary of the output range
+ * @returns A number in the range [min, max]
+ * @type Number
+ */
+Number.prototype.clamp = function(min, max) {
+    return Math.min(Math.max(this, min), max);
+  };
+
 // Function which passes off the stored local settings to the server for storing, or fetched from the server to the client
 async function updateSettings(method) {
     switch (method) {
@@ -876,6 +891,87 @@ async function updateSettings(method) {
             break;
     }
 }
+
+// Header movement on scroll
+// Define your variables in the outer scope
+var header;
+var sectionHeader;
+
+document.body.addEventListener('touchstart', function(event) {
+    event.stopPropagation();
+    console.log(event);
+}, true);
+
+document.body.addEventListener('touchmove', function(event) {
+    event.stopPropagation();
+    console.log(event);
+}, true);
+
+document.body.addEventListener('touchend', function(event) {
+    event.stopPropagation();
+}, true);
+
+// Create a MutationObserver to watch for changes to the DOM
+var observer = new MutationObserver(function() {
+    // Try to select the elements
+    header = document.querySelector('header');
+    sectionHeader = document.querySelector('.section-header > .content > h1');
+
+    // If both elements have been found, disconnect the observer
+    if (header && sectionHeader) {
+        document.body.addEventListener('scroll', headerUpdate);
+        observer.disconnect();
+    }
+});
+
+// // Start observing the document with the configured parameters
+observer.observe(document, { childList: true, subtree: true });
+
+/// Event Listeners
+// document.addEventListener('scroll', headerUpdate);
+// document.addEventListener('touchmove', headerUpdate);
+// document.addEventListener('touch', headerUpdate);
+// document.addEventListener('wheel', headerUpdate);
+// document.addEventListener('keydown', headerUpdate)
+
+function headerUpdate() {
+    // Get if the sectionHeader is on screen
+    let sectionHeaderRect = sectionHeader.getBoundingClientRect();
+
+    if (header.style.opacity == 0) {
+        header.style.opacity = 1;
+    }
+
+    if (sectionHeaderRect.top <= 0) { // Opaque
+        // header.style.backdropFilter = `opacity(${new CSSMathClamp(0, Math.abs(sectionHeaderRect.top)/12, 1)});`;
+        // header.style.backgroundColor = `rgba(255, 255, 255, ${Math.abs(sectionHeaderRect.top / 100)})`;
+        header.style.backgroundColor = `rgba(255, 255, 255, 0.9333)`;
+        header.style.backdropFilter = `blur(${Math.abs(sectionHeaderRect.top / 10).clamp(0, 10)}px)`;
+        header.style.borderBottom = `0.5px solid rgba(188, 188, 193, ${Math.abs(sectionHeaderRect.top / 15).clamp(0, 1)})`;
+        
+        if (header.children[0].style.opacity == 0) {
+            header.children[0].style = `animation: headerFadeIn 0.15s ease-out;`
+            header.children[0].onanimationend = function() {
+                header.children[0].style.opacity = 1;
+            }
+        }
+
+        // console.log(sectionHeaderRect);
+    } else { // Transparent
+        header.style.backgroundColor = `rgba(255, 255, 255, 1)`;
+        header.style.backdropFilter = `blur(0px)`;
+        header.style.borderBottom = `0.5px solid rgba(188, 188, 193, 0)`;
+        
+        if (header.children[0].style.opacity == 1) {
+            header.children[0].style = `animation: headerFadeOut 0.15s ease-out;`
+            header.children[0].onanimationend = function() {
+                header.children[0].style.opacity = 0;
+            }
+        }
+        // console.log(sectionHeaderRect);
+    }
+}
+
 
 // intervalLoop();
 
